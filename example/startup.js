@@ -2,12 +2,18 @@ const Cnf = require(`${__dirname}/../Cnf`);
 async function main(){
     let cnf = new Cnf({
         CONFIG : {
-            hello : 'world'
+            NET : {
+                MAX_INBOUND : 117,
+                MAX_OUTBOUND : 8
+            }
         }
     })
-    
-    console.log(cnf);
-    console.log(global.CNF);
-}
 
+    await cnf.startup({
+        netCallback : async function(data){
+            console.log(`receive data : `);
+            console.log(data);
+        }
+    });
+}
 main();

@@ -10,10 +10,10 @@
  */
 let print = {
     info : function(msg){
-        console.log(new Date() + '\033[42;37m√ => ' + msg + ' :\033[0m ');
+        console.log(new Date() + '\033[42;37m√ => ' + msg + '\033[0m ');
     },
     error : function(msg){
-        console.log(new Date() + 'x => \033[41;37m ' + msg + ' :\033[0m ');
+        console.log(new Date() + 'x => \033[41;37m ' + msg + '\033[0m ');
     }
 }
 
