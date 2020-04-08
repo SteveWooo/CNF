@@ -10,6 +10,7 @@ async function main(){
     })
 
     await cnf.startup({
+        port : global.CNF.argv.port,
         netCallback : async function(data){
             console.log(`receive data : `);
             console.log(data);

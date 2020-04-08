@@ -44,7 +44,7 @@ module.exports = function(param) {
      * 全局网络状态
      */
     globalCNF.net = {
-        // 服务端身份的socket
+        // 服务端和客户端身份的socket
         serverSocket : undefined,
         client : {
 
@@ -56,6 +56,14 @@ module.exports = function(param) {
         connections : {
             inBound : {},
             outBound : {}
+        },
+
+        /**
+         * 路由桶，先写内存，后续写入硬盘
+         */
+        buckets : {
+            tried : {},
+            new : {}
         }
     }
 
@@ -71,6 +79,7 @@ module.exports = function(param) {
      */
     let cnfNet = {
         initServer : require(`${__dirname}/../services/net/initServer`),
+        initClient : require(`${__dirname}/../services/net/initClient`),
     }
     let cnfDao = {
         init : require(`${__dirname}/../services/dao/init`),
@@ -107,9 +116,10 @@ module.exports = function(param) {
         print.info(`Node starting ...`);
         await cnfDao.init();
         await cnfNet.initServer({
-            port : global.CNF.argv.port,
+            port : param.port,
             netCallback : param.netCallback
         });
+        await cnfNet.initClient();
         print.info(`Node started ! `);
     }
 
