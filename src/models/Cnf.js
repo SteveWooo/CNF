@@ -1,6 +1,6 @@
 /**
  * Author : Create by SteveWooo at 2020/4/4
- * Updated: 2020/4/5
+ * Updated: 2020/5/10
  * Email  : SteveWoo23@gmail.com
  * Github : https://github.com/stevewooo
  */
@@ -13,6 +13,7 @@ const Error = require(`${__dirname}/../utils/Error`);
 
 module.exports = function(param) {
     let that = this;
+    param = param || {};
     /**
      * 这个对象存全局，文档要说明这个全局对象不能覆盖
      */
@@ -25,12 +26,18 @@ module.exports = function(param) {
     /**
      * 全局可用的配置，以及一些默认配置
      */
-    globalCNF.CONFIG = param.CONFIG;
-    if(globalCNF.CONFIG.dataDir == undefined) {
+    globalCNF.CONFIG = param.CONFIG || {};
+    if(globalCNF.CONFIG.DATA_DIR == undefined) {
         /**
          * 默认数据目录就用执行程序的当前目录
          */
-        globalCNF.CONFIG.dataDir = path.resolve();
+        globalCNF.CONFIG.DATA_DIR = path.resolve();
+    }
+    if(globalCNF.CONFIG.NET == undefined) {
+        globalCNF.CONFIG.NET = {
+            MAX_INBOUND : 117,
+            MAX_OUTBOUND : 8
+        }
     }
 
     /**
@@ -80,6 +87,7 @@ module.exports = function(param) {
     let cnfNet = {
         initServer : require(`${__dirname}/../services/net/initServer`),
         initClient : require(`${__dirname}/../services/net/initClient`),
+        findNodeJob : require(`${__dirname}/../services/net/findNodeJob`)
     }
     let cnfDao = {
         init : require(`${__dirname}/../services/dao/init`),
@@ -96,7 +104,29 @@ module.exports = function(param) {
      * 对外开放的网络接口，主要解决发包和收包回调注册的问题
      */
     this.net = {
-        
+        msg : {
+            registerMsgEvent : async function(param){
+                /**
+                 * 服务端行为主要
+                 */
+                await cnfNet.initServer({
+                    port : param.port,
+                    netCallback : param.netCallback
+                });
+            }
+        },
+        node : {
+            /**
+             * 节点初始化入口，由于配置都存全局，所以不需要传什么参数。
+             * 节点初始化的目的是开始寻址
+             */
+            startup : async function(param) {
+                print.info(`Node starting ...`);
+                await cnfNet.initClient();
+                await cnfNet.findNodeJob();
+                print.info(`Node started ! `);
+            }
+        }
     }
 
     /**
@@ -107,21 +137,9 @@ module.exports = function(param) {
     }
 
     /**
-     * 节点初始化入口，由于配置都存全局，所以不需要传什么参数。
-     * 1、dao初始化
-     * 2、网络初始化，包括服务端与客户端身份
-     * @param netCallback 数据包回调函数
+     * 实例化后的操作。
      */
-    this.startup = async function(param){
-        print.info(`Node starting ...`);
-        await cnfDao.init();
-        await cnfNet.initServer({
-            port : param.port,
-            netCallback : param.netCallback
-        });
-        await cnfNet.initClient();
-        print.info(`Node started ! `);
-    }
+    cnfDao.init();
 
     return this;
 }
