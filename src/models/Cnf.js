@@ -123,7 +123,7 @@ module.exports = function(param) {
             startup : async function(param) {
                 print.info(`Node starting ...`);
                 await cnfNet.initClient();
-                await cnfNet.findNodeJob();
+                cnfNet.findNodeJob();
                 print.info(`Node started ! `);
             }
         }
