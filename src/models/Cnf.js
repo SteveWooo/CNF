@@ -26,18 +26,12 @@ module.exports = function(param) {
     /**
      * 全局可用的配置，以及一些默认配置
      */
-    globalCNF.CONFIG = param.CONFIG || {};
+    globalCNF.CONFIG = {};
     if(globalCNF.CONFIG.DATA_DIR == undefined) {
         /**
          * 默认数据目录就用执行程序的当前目录
          */
         globalCNF.CONFIG.DATA_DIR = path.resolve();
-    }
-    if(globalCNF.CONFIG.NET == undefined) {
-        globalCNF.CONFIG.NET = {
-            MAX_INBOUND : 117,
-            MAX_OUTBOUND : 8
-        }
     }
 
     /**
@@ -51,44 +45,45 @@ module.exports = function(param) {
      * 全局网络状态
      */
     globalCNF.net = {
-        // 服务端和客户端身份的socket
+        // 服务端身份的socket，在net.connection中设置这个socket
         serverSocket : undefined,
-        client : {
-
-        },
 
         /**
-         * 节点连接状态，包括对外连接和对内链接。
+         * 节点连接状态，包括对外连接和对内链接的Node，其中这些Node都带有socket属性
+         * 这个数据在cnfNet中详细初始化。
          */
-        connections : {
-            inBound : {},
-            outBound : {}
-        },
+        connections : {},
 
         /**
-         * 路由桶，先写内存，后续写入硬盘
+         * 路由桶，主要为寻址服务
+         * 这个数据结构在cnfNet中做详细的初始化，以那个函数的数据结构为准。
          */
-        buckets : {
-            tried : {},
-            new : {}
-        }
+        buckets : {}
     }
 
     /**
      * 拿控制台参数
      */
     globalCNF.argv = argv.getArgv();
-
     global.CNF = globalCNF;
 
     /**
      * 一些内部函数入口，比如网络和dao的初始化
+     * 并注入对业务方开放的handle部分
      */
-    let cnfNet = {
-        initServer : require(`${__dirname}/../services/net/initServer`),
-        initClient : require(`${__dirname}/../services/net/initClient`),
-        findNodeJob : require(`${__dirname}/../services/net/findNodeJob`)
+    let cnfNet = require(`${__dirname}/net/cnfNet`);
+    this.net = cnfNet.handle();
+    
+    /**
+     * 集成常用工具库，需要根据具体项目实施
+     */
+    this.utils = {
+        print : require(`${__dirname}/../utils/print`),
     }
+
+    /**
+     * 一些数据库的内部函数入口
+     */
     let cnfDao = {
         init : require(`${__dirname}/../services/dao/init`),
     }
@@ -101,45 +96,13 @@ module.exports = function(param) {
     }
 
     /**
-     * 对外开放的网络接口，主要解决发包和收包回调注册的问题
+     * 在构建函数中统一调用初始化函数。这里需要数据层完成后才轮到网络层初始化
      */
-    this.net = {
-        msg : {
-            registerMsgEvent : async function(param){
-                /**
-                 * 服务端行为主要
-                 */
-                await cnfNet.initServer({
-                    port : param.port,
-                    netCallback : param.netCallback
-                });
-            }
-        },
-        node : {
-            /**
-             * 节点初始化入口，由于配置都存全局，所以不需要传什么参数。
-             * 节点初始化的目的是开始寻址
-             */
-            startup : async function(param) {
-                print.info(`Node starting ...`);
-                await cnfNet.initClient();
-                cnfNet.findNodeJob();
-                print.info(`Node started ! `);
-            }
-        }
+    this.build = async function(){
+        await cnfDao.init();
+        await cnfNet.init();
     }
-
-    /**
-     * 集成常用工具库，需要根据具体项目实施
-     */
-    this.utils = {
-        print : require(`${__dirname}/../utils/print`),
-    }
-
-    /**
-     * 实例化后的操作。
-     */
-    cnfDao.init();
+    
 
     return this;
 }

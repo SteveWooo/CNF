@@ -11,7 +11,7 @@ let Cnf = require(`${__dirname}/../Cnf.js`);
  */
 async function main(){
     let cnf = new Cnf();
-
+    await cnf.build();
     /**
      * 注册网络消息事件回调，netCallback函数为业务主要函数的入口
      */
@@ -24,6 +24,7 @@ async function main(){
         }
     })
 
+
     /**
      * 启动组网流程，从DNS seed出发寻找所有可用的节点
      */
@@ -32,8 +33,8 @@ async function main(){
     /**
      * 广播业务数据，由业务自行调用
      */
-    await cnf.net.msg.send({
-        msg : {} // 业务数据
-    })
+    // await cnf.net.msg.send({
+    //     msg : {} // 业务数据
+    // })
 }
 main()
