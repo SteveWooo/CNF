@@ -10,13 +10,14 @@ let Cnf = require(`${__dirname}/../Cnf.js`);
  * 入口处实例化CNF，保留全局变量global.CNF
  */
 async function main(){
-    let cnf = new Cnf();
+    let cnf = new Cnf({
+        config: require(`${__dirname}/config.json`)
+    });
     await cnf.build();
     /**
      * 注册网络消息事件回调，netCallback函数为业务主要函数的入口
      */
     await cnf.net.msg.registerMsgEvent({
-        port : global.CNF.argv.port,
         netCallback : async function(data){
             console.log(`receive data : `);
             console.log(data);

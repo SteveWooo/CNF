@@ -17,6 +17,9 @@ const ERROR = {
     },
     5005 : {
         msg : '关键内存复用错误'
+    },
+    6001 : {
+        msg : '数据包源格式错误'
     }
 }
 module.exports = function (code, msg){

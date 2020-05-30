@@ -1,0 +1,6 @@
+{
+    "net" : {
+        "discoverUdpPort" : 40404,
+        "connectionTcpServerPort" : 1931
+    }
+}

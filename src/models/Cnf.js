@@ -27,12 +27,14 @@ module.exports = function(param) {
      * 全局可用的配置，以及一些默认配置
      */
     globalCNF.CONFIG = {};
-    if(globalCNF.CONFIG.DATA_DIR == undefined) {
-        /**
-         * 默认数据目录就用执行程序的当前目录
-         */
-        globalCNF.CONFIG.DATA_DIR = path.resolve();
+    // 载入配置
+    if(param.config != undefined) {
+        for(var i in param.config) {
+            globalCNF.CONFIG[i] = param.config[i];
+        }
     }
+    // 直接用当前目录
+    globalCNF.CONFIG.DATA_DIR = path.resolve();
 
     /**
      * 全局调用的一些状态
@@ -45,6 +47,9 @@ module.exports = function(param) {
      * 全局网络状态
      */
     globalCNF.net = {
+        // 节点发现服务的对象
+        discover : {},
+
         // 服务端身份的socket，在net.connection中设置这个socket
         serverSocket : undefined,
 
@@ -96,13 +101,12 @@ module.exports = function(param) {
     }
 
     /**
-     * 在构建函数中统一调用初始化函数。这里需要数据层完成后才轮到网络层初始化
+     * 在构建函数中统一调用初始化函数。目的是构建global.CNF中的对象数据结构
      */
     this.build = async function(){
         await cnfDao.init();
         await cnfNet.init();
     }
-    
 
     return this;
 }

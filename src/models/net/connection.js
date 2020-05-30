@@ -5,11 +5,12 @@
  * Github : https://github.com/stevewooo
  */
 const net = require('net');
+let model = {};
 const CONFIG = {
     MAX_INBOUND : 117,
     MAX_OUTBOUND : 8
 }
-let model = {};
+model.CONFIG = CONFIG;
 
 let init = async function(){
     let globalConnection = {

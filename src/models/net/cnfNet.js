@@ -8,11 +8,13 @@
 const print = require(`${__dirname}/../../utils/print`);
 const Error = require(`${__dirname}/../../utils/Error`);
 const net = require('net');
+const dgram = require('dgram');
 // 内部函数在这里为主
 let model = {
     // 子对象
     bucket : require(`${__dirname}/bucket`),
     connection : require(`${__dirname}/connection`),
+    discover : require(`${__dirname}/discover`),
 
     // 子对象类
     Node : require(`${__dirname}/Node`)
@@ -105,14 +107,58 @@ let nodeServerModel = {
  * 节点发现服务的目的是填充bucket
  */
 let nodeDiscoverModel = {
-    // 启动被人发现的UDP服务
-    initServer : async function(){
-
-    },
     isDetecting : false,
-    // 启动发现别人的UDP服务
+    
+    /**
+     * 这里负责主动ping邻居
+     */
     initDetect : async function(){
+        // 获取一个邻居，然后ping他
+    },
 
+    onMessage : async function(msg, remote){
+        try{
+            msg = JSON.parse(msg);
+        }catch(e) {
+            throw Error(6001)
+        }
+        // 这里试别包类型
+        if(msg.type == model.discover.CONFIG.PING_TYPE) { // Ping
+            let result = await model.discover.reciveNodePing(msg, remote, {
+                Node: model.Node
+            })
+
+            // todo push new bucket
+        }
+        if(msg.type == model.discover.CONFIG.NEIGHBOR_TYPE) { // Neighbor
+            let result = await model.discover.receiveNodeNeighbor(msg, remote, {
+                Node: model.Node
+            })
+
+            // todo push neighbor cache
+        }
+    },
+
+    onListening : async function(){
+        print.info(`Discover service is listening at: ${global.CNF.CONFIG.net.discoverUdpPort}`);
+    },
+
+    onError : async function(e) {
+        console.log(e);
+    },
+
+    init : async function(){
+        // 初始化被人发现的udp socket
+        await model.discover.init({
+            callbackFunc : {
+                message : nodeDiscoverModel.onMessage,
+                listening : nodeDiscoverModel.onListening,
+                error : nodeDiscoverModel.onError,
+            }
+        });
+
+        // 初始化ping邻居的探测器。如果没邻居，就从种子里面找。
+        await nodeDiscoverModel.initDetect();
     }
 }
 
@@ -128,7 +174,7 @@ let handle = function(){
                     throw Error(5004, 'netCallback 参数错误');
                 }
                 let serverSocket = await nodeServerModel.initServer({
-                    port : param.port,
+                    port : global.CNF.CONFIG.net.connectionTcpServerPort,
                     netCallback : param.netCallback
                 });
                 global.CNF.net.serverSocket = serverSocket;
@@ -155,9 +201,8 @@ model.handle = handle;
  */
 let init = async function(){
     await model.bucket.init();
+    await nodeDiscoverModel.init();
     await model.connection.init();
-    await nodeDiscoverModel.initServer(); // 节点发现服务——被发现
-    await nodeDiscoverModel.initDetect(); // 节点发现服务——去发现
 
     // 先加几个憨憨节点进去测试
     let node1 = new model.Node({

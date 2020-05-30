@@ -5,13 +5,14 @@
  * Github : https://github.com/stevewooo
  */
 
+let model = {};
 const CONFIG = {
     TRIED_BUCKET_TOTAL : 16,
     TRIED_BUCKET_LENGTH : 16,
     NEW_BUCKET_TOTAL : 64,
     NEW_BUCKET_LENGTH : 32
 }
-let model = {};
+model.CONFIG = CONFIG;
 
 let init = async function(){
     let globalBuckets = {
@@ -26,6 +27,8 @@ let init = async function(){
     for(var i=0;i<CONFIG.NEW_BUCKET_TOTAL;i++) {
         globalBuckets.new[i] = [];
     }
+
+    // todo 读取本地路由信息
 
     global.CNF.net.buckets = globalBuckets;
 }
