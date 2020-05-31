@@ -15,6 +15,7 @@ function getArgv(){
 			argv[process.argv[i].replace("-","")] = process.argv[i + 1];
 		}
 	}
+	console.log(argv)
 	return argv;
 }
 

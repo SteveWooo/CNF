@@ -19,6 +19,10 @@ const CONFIG = {
 }
 model.CONFIG = CONFIG;
 
+/**
+ * 初始化全局数据结构
+ * 初始化socket
+ */
 let init = async function(param){
     let globalDiscover = {
         udpSocket : undefined,
@@ -65,10 +69,12 @@ let receiveNodeNeighbor = async function(msg, remote, injection) {
 model.receiveNodeNeighbor = receiveNodeNeighbor;
 
 /**
- * 获取一个邻居节点，然后尝试Ping他
+ * 获取一个邻居节点，本质上这里是获取一个连接任务。
+ * 如果邻居列表为空，就找种子列表。
  */
-let getNeighborNode = async function() {
+let getNeighbor = async function() {
 
 }
+model.getNeighbor = getNeighbor;
 
 module.exports = model;

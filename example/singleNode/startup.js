@@ -4,7 +4,7 @@
  * Email  : SteveWoo23@gmail.com
  * Github : https://github.com/stevewooo
  */
-let Cnf = require(`${__dirname}/../Cnf.js`);
+let Cnf = require(`${__dirname}/../../Cnf.js`);
 
 /**
  * 入口处实例化CNF，保留全局变量global.CNF

@@ -12,6 +12,9 @@
  */
 const print = require(`${__dirname}/print`);
 const ERROR = {
+    50041 : {
+        msg : '启动配置读取失败'
+    },
     5004 : {
         msg : '系统传参错误'
     },

@@ -24,14 +24,25 @@ module.exports = function(param) {
     }
 
     /**
-     * 全局可用的配置，以及一些默认配置
+     * 拿控制台参数
+     */
+    globalCNF.argv = argv.getArgv();
+
+    /**
+     * 全局可用的配置，以及一些默认配置。先从参数中拿到配置文件位置，然后读出来。如果参数没有，就拿默认启动目录下的。
      */
     globalCNF.CONFIG = {};
+    if(param.config == undefined) {
+        let configPath = globalCNF.argv['config'] || `${path.resolve()}/config.json`;
+        param.config = require(`${path.resolve(configPath)}`);
+    }
     // 载入配置
     if(param.config != undefined) {
         for(var i in param.config) {
             globalCNF.CONFIG[i] = param.config[i];
         }
+    } else {
+        throw new Error(50041);
     }
     // 直接用当前目录
     globalCNF.CONFIG.DATA_DIR = path.resolve();
@@ -47,6 +58,9 @@ module.exports = function(param) {
      * 全局网络状态
      */
     globalCNF.net = {
+        // 节点唯一标识
+        nodeId : '',
+
         // 节点发现服务的对象
         discover : {},
 
@@ -66,10 +80,6 @@ module.exports = function(param) {
         buckets : {}
     }
 
-    /**
-     * 拿控制台参数
-     */
-    globalCNF.argv = argv.getArgv();
     global.CNF = globalCNF;
 
     /**

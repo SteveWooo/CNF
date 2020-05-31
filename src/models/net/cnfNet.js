@@ -7,6 +7,7 @@
  */
 const print = require(`${__dirname}/../../utils/print`);
 const Error = require(`${__dirname}/../../utils/Error`);
+const sign = require(`${__dirname}/../utils/sign`);
 const net = require('net');
 const dgram = require('dgram');
 // 内部函数在这里为主
@@ -108,12 +109,12 @@ let nodeServerModel = {
  */
 let nodeDiscoverModel = {
     isDetecting : false,
-    
     /**
      * 这里负责主动ping邻居
      */
     initDetect : async function(){
         // 获取一个邻居，然后ping他
+        let node = await model.discover.getNeighbor();
     },
 
     onMessage : async function(msg, remote){
@@ -138,17 +139,15 @@ let nodeDiscoverModel = {
             // todo push neighbor cache
         }
     },
-
     onListening : async function(){
         print.info(`Discover service is listening at: ${global.CNF.CONFIG.net.discoverUdpPort}`);
     },
-
     onError : async function(e) {
         console.log(e);
     },
 
     init : async function(){
-        // 初始化被人发现的udp socket
+        // 初始化全局数据结构，初始化被人发现的udp socket
         await model.discover.init({
             callbackFunc : {
                 message : nodeDiscoverModel.onMessage,
@@ -156,9 +155,6 @@ let nodeDiscoverModel = {
                 error : nodeDiscoverModel.onError,
             }
         });
-
-        // 初始化ping邻居的探测器。如果没邻居，就从种子里面找。
-        await nodeDiscoverModel.initDetect();
     }
 }
 
@@ -187,7 +183,9 @@ let handle = function(){
              */
             startup : async function(param) {
                 print.info(`Node starting ...`);
-                // await cnfNet.initClient();
+                // 填bucket
+                await nodeDiscoverModel.initDetect();
+                // 从bucket中找人连接
                 await findNodeModel.findNodeJob();
                 print.info(`Node started ! `);
             }
@@ -196,10 +194,24 @@ let handle = function(){
 }
 model.handle = handle;
 
+function createNodeId(){
+    let key = {
+        privateKey : global.CNF.CONFIG.net.localPrivateKey,
+        publicKey : '',
+    }
+    if(key.privateKey == undefined || key.privateKey.length !== 64) {
+        key = sign.genKeys();
+    } else {
+        key.publicKey = sign.getPublicKey(key.privateKey);
+    }
+    return key.publicKey;
+}
 /**
  * 网络服务的基本初始化入口，比如对桶的初始化
  */
 let init = async function(){
+    // NodeId的生成，核心逻辑，不分装了。
+    global.CNF.net.nodeId = createNodeId();
     await model.bucket.init();
     await nodeDiscoverModel.init();
     await model.connection.init();
