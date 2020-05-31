@@ -23,7 +23,7 @@ model.CONFIG = CONFIG;
  * 初始化全局数据结构
  * 初始化socket
  */
-let init = async function(param){
+let build = async function(param){
     let globalDiscover = {
         udpSocket : undefined,
         neighbor : [],
@@ -39,9 +39,11 @@ let init = async function(param){
     // 绑定端口，这里会触发listening回调
     globalDiscover.udpSocket.bind(global.CNF.CONFIG.net.discoverUdpPort);
 
+    // TODO：第一次进来，把配置里面的seed全部加到邻居列表里面。
+
     global.CNF.net.discover = globalDiscover;
 }
-model.init = init;
+model.build = build;
 
 /**
  * 收到一个节点的PING，放到这个函数里面

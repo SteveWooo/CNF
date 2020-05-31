@@ -14,7 +14,7 @@ const CONFIG = {
 }
 model.CONFIG = CONFIG;
 
-let init = async function(){
+let build = async function(){
     let globalBuckets = {
         tried : [],
         new : []
@@ -32,7 +32,7 @@ let init = async function(){
 
     global.CNF.net.buckets = globalBuckets;
 }
-model.init = init;
+model.build = build;
 
 /**
  * 从某个桶里面随机抽取一个节点出来的函数在这里

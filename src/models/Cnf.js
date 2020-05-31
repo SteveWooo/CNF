@@ -74,6 +74,11 @@ module.exports = function(param) {
         connections : {},
 
         /**
+         * 消息池，其他节点发来的消息，全部先丢到这个池子里面，然后定期捞出来，捞出来callback给业务
+         */
+        msgPool : [],
+
+        /**
          * 路由桶，主要为寻址服务
          * 这个数据结构在cnfNet中做详细的初始化，以那个函数的数据结构为准。
          */
@@ -115,7 +120,7 @@ module.exports = function(param) {
      */
     this.build = async function(){
         await cnfDao.init();
-        await cnfNet.init();
+        await cnfNet.build();
     }
 
     return this;
