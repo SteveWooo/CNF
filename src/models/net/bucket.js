@@ -56,6 +56,32 @@ let getNodeFromBucket = async function(bucketName) {
 model.getNodeFromBucket = getNodeFromBucket;
 
 /**
+ * 用于检查这个Node是否已经在桶里。因为已经在桶里，就不重复ping了
+ */
+let isNodeAlreadyInBucket = async function(node) {
+    let flag = false;
+    for(var i=0;i<global.CNF.net.buckets.tried.length;i++) {
+        for(var k=0;k<global.CNF.net.buckets.tried[i].length;k++) {
+            if(node.nodeId == global.CNF.net.buckets.tried[i][k].nodeId) {
+                flag = true;
+                return flag;
+            }
+        }
+    }
+
+    for(var i=0;i<global.CNF.net.buckets.new.length;i++) {
+        for(var k=0;k<global.CNF.net.buckets.new[i].length;k++) {
+            if(node.nodeId == global.CNF.net.buckets.new[i][k].nodeId) {
+                flag = true;
+                return flag;
+            }
+        }
+    }
+    return flag;
+}
+model.isNodeAlreadyInBucket = isNodeAlreadyInBucket;
+
+/**
  * 往桶里添加新的Node
  */
 let addNodeToTried = async function(node){
@@ -63,6 +89,17 @@ let addNodeToTried = async function(node){
     global.CNF.net.buckets.tried[0].push(node);
 }
 let addNodeToNew = async function(node){
+    let flag = false;
+    for(var i=0;i<global.CNF.net.buckets.new.length;i++) {
+        for(var k=0;k<global.CNF.net.buckets.new[i].length;k++) {
+            if(node.nodeId == global.CNF.net.buckets.new[i][k].nodeId) {
+                flag = true;
+            }
+        }
+    }
+    if(flag == true) {
+        return ;
+    }
     //test
     global.CNF.net.buckets.new[0].push(node);
 }

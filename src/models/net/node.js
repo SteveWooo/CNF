@@ -12,7 +12,7 @@ const crypto = require('crypto');
  */
 let Node = function(param){
     let node = {
-        id : param.id,
+        nodeId : param.nodeId,
         ip : param.ip,
         tcpport : param.tcpport,
         udpport : param.udpport,

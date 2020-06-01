@@ -27,9 +27,9 @@ let build = async function(param){
      * 服务端身份的SOCKET初始化
      */
     let serverSocket = net.createServer(param.callbackFunc.onConnect);
-    serverSocket.listen(global.CNF.CONFIG.net.tcpport, CONFIG.HOST);
+    serverSocket.listen(global.CNF.CONFIG.net.connectionTcpServerPort, CONFIG.HOST);
     global.CNF.net.serverSocket = serverSocket;
-    print.info(`Node listen at ${CONFIG.HOST}:${global.CNF.CONFIG.net.tcpport}`);
+    print.info(`Node listen at ${CONFIG.HOST}:${global.CNF.CONFIG.net.connectionTcpServerPort}`);
 }
 model.build = build;
 
@@ -40,8 +40,8 @@ let tryOutBoundConnect = async function(node){
     if(global.CNF.net.connections.outBound.length >= CONFIG.MAX_OUTBOUND) {
         return ;
     }
-    console.log('tring conn:');
-    console.log(node);
+    // console.log('tring conn:');
+    // console.log(node);
 
     // 这么连接别的节点就行了。
     // let socket = net.connect();
