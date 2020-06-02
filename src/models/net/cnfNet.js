@@ -22,6 +22,59 @@ let model = {
 }
 
 /**
+ * 接受TCP数据的入口模块.
+ */
+let receiveTcpMsgModel = {
+    // 无论如何,连接成功后第一件事情都要和对方做tcpShake, 收到shake, 要shakeBack
+    events : {
+        // 我主动连接别人的话, 那我只能收到shakeBack
+        shakeBackEvent : async function(socket, data, fromType) {
+            // console.log('get shake back');
+            data.msg = JSON.parse(data.msg);
+            let node = new model.Node(data.msg.from);
+            // 只把主动连接的节点放tried, 被动链接的不放
+            if(fromType == 'outBoundNodeMsg') {
+                await model.connection.finishTcpShake(socket, node, fromType);
+                await model.bucket.addTryingNodeToTried(node);
+            }
+        },
+        // 别人连接完我之后, 第一时间就是给我发shake. 那么我这个时候就需要把这个socket放到inBound里面了.
+        shakeEvent : async function(socket, data, fromType){
+            // console.log('get shake');
+            data.msg = JSON.parse(data.msg);
+            let node = new model.Node(data.msg.from);
+            // 把节点从tempConnection放到inBound
+            if(fromType == 'inBoundNodeMsg') {
+                await model.connection.finishTcpShake(socket, node, fromType);
+            }
+
+            await model.connection.tcpShakeBack(socket);
+        },
+        bussEvent : async function(socket, data, fromType) {
+            // console.log('get buss')
+            // 先检查在不在inBound和outBound桶里, 不在的话, 就丢掉. 只有合法的节点才能发buss消息
+            if(!(await model.connection.isAlreadyTcpShake(socket))) {
+                return ;
+            }
+            await model.connection.pushMsgPool({
+                fromType : fromType,
+                socket : socket,
+                msg : data
+            });
+        }
+    },
+
+    // 入口
+    onMessage : async function(socket, data, fromType) {
+        data = JSON.parse(data.toString());
+        if(!(data.event in receiveTcpMsgModel.events)) {
+            return ;
+        }
+        await receiveTcpMsgModel.events[data.event](socket, data, fromType);
+    }
+}
+
+/**
  * 节点的被链接渠道主要在这里实现。——被动连接渠道
  * 节点被连接渠道的目的是填充connection.inBound
  */
@@ -34,18 +87,17 @@ let nodeServerModel = {
         }
         nodeServerModel.isConnecting = true;
         print.info(`Was connected by ${socket.remoteAddress}:${socket.remotePort}`);
-        socket.on('data', async function(data){
-            data = data.toString();
-            /**
-             * TODO 先检查包是否符合CNF通讯协议，然后把data封装成用户客制化可读模式，包括信息来源，具体信息等
-             */
-            await model.connection.pushInBoundConnection(socket, data.nodeId);
-            
-            // 检查完毕后，塞入消息池
-            await model.connection.pushMsgPool(msg);
-        })
 
-        // todo 检查inBound是否满了，满了就踢掉它
+        // 有人来连接,就扔进temp先
+        await model.connection.pushTempConnection(socket);
+
+        socket.on('data', async function(data){
+            let result = await receiveTcpMsgModel.onMessage(socket, data, 'inBoundNodeMsg');
+            return ;
+        })
+        socket.on('error', async function(e) {
+            // todo
+        })
 
         nodeServerModel.isConnecting = false;
         return ;
@@ -69,6 +121,10 @@ let nodeServerModel = {
 let findNodeModel = {
     isFinding : false, // 锁
 
+    onMessage : async function(data, socket) {
+        let result = await receiveTcpMsgModel.onMessage(socket, data, 'outBoundNodeMsg');
+        return ;
+    },
     /**
      * 找节点工作为：
      * p
@@ -77,7 +133,6 @@ let findNodeModel = {
      * v
      */
     doFindNode : async function(){
-        console.log('finding connection')
         findNodeModel.isFinding = true;
         let Config = global.CNF.CONFIG.NET;
         
@@ -93,21 +148,31 @@ let findNodeModel = {
 
         // 如果这个节点在连接池的话，直接跳过
         if((await model.connection.isNodeAlreadyConnected(node)) == true) {
+            // console.log('already conn:', node.nodeId);
             findNodeModel.isFinding = false;
             return ;
         }
 
-        // 尝试连接这个幸运儿节点
-        print.info('connecting');
-        console.log(node);
-        await model.connection.tryOutBoundConnect(node);
+        // 尝试连接这个幸运儿节点,然后加入全局
+        let socket = await model.connection.tryOutBoundConnect(node, {
+            onMessage : findNodeModel.onMessage
+        });
+        // 是undefined就说明socket创建失败
+        if(socket != undefined) {
+            // 先扔进temp里面, 等对面来确认了, 再扔进对应的Bound里面
+            await model.connection.pushTempConnection(socket, node);
+            // 尝试完就扔tryingNode里面
+            await model.bucket.tryConnectNode(node);
+            // 然后马上给对方发tcpshake包,表明自己的nodeId
+            await model.connection.tcpShake(socket);
+        }
 
         findNodeModel.isFinding = false;
     },
     findNodeJob : async function(){
         setInterval(async function(){
+            // console.log(global.CNF.net.buckets)
             if(findNodeModel.isFinding == true) {
-                console.log('connection locked')
                 return ;
             }
             await findNodeModel.doFindNode();
@@ -204,6 +269,8 @@ let nodeDiscoverModel = {
         print.info(`Discover service is listening at: ${global.CNF.CONFIG.net.discoverUdpPort}`);
         return ;
     },
+
+    // todo 踢掉断开连接的socket
     onError : async function(e) {
         console.log(e);
         return ;
@@ -243,10 +310,32 @@ let handle = function(){
                 setInterval(async function(){
                     let msg = await model.connection.getMsgPool();
                     if(msg !== undefined) {
-                        await param.netCallback(msg);
+                        await param.netCallback({
+                            socket : msg.socket,
+                            msg : msg.msg
+                        });
                     }
                 }, 16);
                 return ;
+            },
+
+            // 广播一段bussEvent消息
+            brocast : async function(msg){
+                let data = {
+                    event : 'bussEvent',
+                    msg : msg
+                }
+                data = JSON.stringify(data);
+                await model.connection.brocast(data);
+            },
+
+            send : async function(socket, msg) {
+                let data = {
+                    event : 'bussEvent',
+                    msg : msg
+                }
+                data = JSON.stringify(data);
+                socket.write(data);
             }
         },
         node : {

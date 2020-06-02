@@ -18,8 +18,8 @@ async function main(){
     await cnf.net.msg.registerMsgEvent({
         netCallback : async function(data){
             console.log(`receive data : `);
-            console.log(data);
-            // 开始你的表演
+            console.log(data.msg);
+            await cnf.net.msg.send(data.socket, 'receive');
         }
     })
 
@@ -31,8 +31,10 @@ async function main(){
     /**
      * 广播业务数据，由业务自行调用
      */
-    // await cnf.net.msg.send({
-    //     msg : {} // 业务数据
-    // })
+    setTimeout(async function(){
+        await cnf.net.msg.brocast({
+            hello : 'world'
+        })
+    }, 4000)
 }
 main()
