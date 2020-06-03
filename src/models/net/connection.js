@@ -46,16 +46,27 @@ function doConnect (node, callbackFunc) {
     return new Promise(resolve=>{
         let socket = new net.Socket();
         socket.setEncoding('utf8');
+        let isConn = false;
         socket = net.connect(node.tcpport, node.ip, function(){
+            // socket.on('error', async function(e) {
+            //     await callbackFunc.onError(e, socket);
+            // })
+            socket.on('data', async function(data){
+                await callbackFunc.onMessage(data, socket);
+            });
             print.info('out bound connected: ' + node.nodeId);
+            isConn = true;
+            resolve(socket);
         });
-        socket.on('error', async function(e) {
-            // todo
+        socket.on('error', async function(e){
+            if(!isConn) {
+                // console.log('on connecting error');
+                resolve();
+                return ;
+            }
+            // console.log('conn lost');
+            await callbackFunc.onError(e, socket);
         })
-        socket.on('data', async function(data){
-            await callbackFunc.onMessage(data, socket);
-        });
-        resolve(socket);
     })
 }
 let tryOutBoundConnect = async function(node, callbackFunc){
@@ -208,6 +219,27 @@ let pushTempConnection = async function(socket, node) {
     return ;
 }
 model.pushTempConnection = pushTempConnection;
+
+/**
+ * 当连接断开时，需要把inBound outBound的对应socket删除。
+ */
+let deleteSocket = async function(socket) {
+    for(var i=0;i<global.CNF.net.connections.outBound.length;i++) {
+        if(socket == global.CNF.net.connections.outBound[i].socket) {
+            let conn = global.CNF.net.connections.outBound.splice(i, 1)[0];
+            return conn.node;
+        }
+    }
+
+    for(var i=0;i<global.CNF.net.connections.inBound.length;i++) {
+        if(socket == global.CNF.net.connections.inBound[i].socket) {
+            let conn = global.CNF.net.connections.inBound.splice(i, 1)[0];
+            return conn.node;
+        }
+    }
+
+}
+model.deleteSocket = deleteSocket;
 
 /**
  * 握手完成的操作:

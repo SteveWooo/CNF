@@ -19,7 +19,7 @@ async function main(){
         netCallback : async function(data){
             console.log(`receive data : `);
             console.log(data.msg);
-            await cnf.net.msg.send(data.socket, 'receive');
+            // await cnf.net.msg.send(data.socket, 'receive');
         }
     })
 
@@ -32,9 +32,9 @@ async function main(){
      * 广播业务数据，由业务自行调用
      */
     setTimeout(async function(){
-        await cnf.net.msg.brocast({
+        await cnf.net.msg.brocast(JSON.stringify({
             hello : 'world'
-        })
+        }))
     }, 4000)
 }
 main()

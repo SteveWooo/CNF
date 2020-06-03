@@ -143,12 +143,20 @@ let tryConnectNode = async function(node) {
         }
     }
     if(tryNode == undefined) {
-        for(var i=0;i<global.CNF.net.buckets.new.length;i++) {
-            for(var k=0;k<global.CNF.net.buckets.new[i].length;k++) {
-                if(node.nodeId == global.CNF.net.buckets.new[i][k].nodeId) {
-                    tryNode = global.CNF.net.buckets.new[i].splice(k, 1)[0];
+        for(var i=0;i<global.CNF.net.buckets.tried.length;i++) {
+            for(var k=0;k<global.CNF.net.buckets.tried[i].length;k++) {
+                if(node.nodeId == global.CNF.net.buckets.tried[i][k].nodeId) {
+                    tryNode = global.CNF.net.buckets.tried[i].splice(k, 1)[0];
                     break;
                 }
+            }
+        }
+    }
+    if(tryNode == undefined) {
+        for(var i=0;i<global.CNF.net.buckets.trying.length;i++) {
+            if(node.nodeId == global.CNF.net.buckets.trying[i].nodeId) {
+                tryNode = global.CNF.net.buckets.trying.splice(i, 1)[0];
+                break;
             }
         }
     }

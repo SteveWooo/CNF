@@ -1,7 +1,7 @@
 {
     "net" : {
         "localPrivateKey" : "c70c5dcc0958294b25d012e9334b06bd9c75cd3c95b300d84d4ddc0925458395",
-        "loaclhost" : "127.0.0.1",
+        "localhost" : "127.0.0.1",
         "discoverUdpPort" : 40404,
         "connectionTcpServerPort" : 1931,
         "seed" : []

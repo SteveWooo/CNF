@@ -21,7 +21,7 @@ function Shake(){
         ts : now,
         from : {
             nodeId : global.CNF.net.nodeId,
-            ip : global.CNF.CONFIG.net.loaclhost,
+            ip : global.CNF.CONFIG.net.localhost,
             tcpport : global.CNF.CONFIG.net.connectionTcpServerPort,
             udpport : global.CNF.CONFIG.net.discoverUdpPort,
         },

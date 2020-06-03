@@ -25,7 +25,13 @@ function Shake(node, type){
     let msg = {
         ts : now,
         type : type,
-        version : CONFIG.VERSION
+        version : CONFIG.VERSION,
+        from : {
+            ip : global.CNF.CONFIG.net.localhost,
+            udpport : global.CNF.CONFIG.net.discoverUdpPort,
+            tcpport : global.CNF.CONFIG.net.connectionTcpServerPort
+            
+        }
     }
 
     // 主体信息需要进一步JSON

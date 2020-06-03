@@ -66,7 +66,11 @@ let receiveTcpMsgModel = {
 
     // 入口
     onMessage : async function(socket, data, fromType) {
-        data = JSON.parse(data.toString());
+        try{
+            data = JSON.parse(data.toString());
+        }catch(e) {
+            throw Error(6001, 'cnfNet.js receiveTcpMsgModel.onMessage');
+        }
         if(!(data.event in receiveTcpMsgModel.events)) {
             return ;
         }
@@ -96,7 +100,8 @@ let nodeServerModel = {
             return ;
         })
         socket.on('error', async function(e) {
-            // todo
+            let node = await model.connection.deleteSocket(socket);
+            print.info(`${node != undefined ? node.nodeId : 'unknow'} has disconneced.`);
         })
 
         nodeServerModel.isConnecting = false;
@@ -124,6 +129,11 @@ let findNodeModel = {
     onMessage : async function(data, socket) {
         let result = await receiveTcpMsgModel.onMessage(socket, data, 'outBoundNodeMsg');
         return ;
+    },
+
+    onError : async function(e, socket) {
+        let node = await model.connection.deleteSocket(socket);
+        print.info(`${node != undefined ? node.nodeId : 'unknow'} has disconneced.`);
     },
     /**
      * 找节点工作为：
@@ -155,7 +165,8 @@ let findNodeModel = {
 
         // 尝试连接这个幸运儿节点,然后加入全局
         let socket = await model.connection.tryOutBoundConnect(node, {
-            onMessage : findNodeModel.onMessage
+            onMessage : findNodeModel.onMessage,
+            onError : findNodeModel.onError
         });
         // 是undefined就说明socket创建失败
         if(socket != undefined) {
@@ -229,7 +240,7 @@ let nodeDiscoverModel = {
             message = JSON.parse(message);
             message.msg = JSON.parse(message.msg);
         }catch(e) {
-            throw Error(6001)
+            throw Error(6001, 'cnfNet.js nodeDiscovermodel.onMessage');
         }
         nodeDiscoverModel.isDetecting = true;
         // TODO: 检测协议合法性。
@@ -272,7 +283,7 @@ let nodeDiscoverModel = {
 
     // todo 踢掉断开连接的socket
     onError : async function(e) {
-        console.log(e);
+        // console.log(e);
         return ;
     },
 
