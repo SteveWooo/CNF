@@ -87,6 +87,10 @@ cnf.net.node.startup();
 #### 返回
 Promise-object ，一个promise响应函数，需要await或then来控制顺序。
 
+#### 示范
+```javascript
+await cnf.net.node.startup();
+```
 ___
 
 ### 消息广播
