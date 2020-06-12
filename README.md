@@ -37,7 +37,8 @@ let cnf = new CNF();
 无
 #### 返回
 返回一个库的实例化对象，里面包含各种接口
-<hr />
+___
+
 ### 框架主类构建函数
 ```javascript
 await cnf.build();
@@ -47,7 +48,8 @@ await cnf.build();
 无
 #### 返回
 Promise-object，一个promise构造函数，需要await或then来控制顺序。
-<hr />
+___
+
 ### 网络消息回调函数注册
 ```javascript
 await cnf.net.msg.registerMsgEvent({
@@ -57,12 +59,14 @@ await cnf.net.msg.registerMsgEvent({
     })
 ```
 注册消息回调函数，主要响应p2p网络上的数据包给业务方使用。这里也是业务方进行共识协议开发的核心函数。
+
 #### 参数
 1. `netCallback` async 函数，p2p网络有数据包回来的时候就会调用这个函数，把数据放进data中。
 
 #### 返回
 Promise-object ，一个promise响应函数，需要await或then来控制顺序。
-<hr />
+___
+
 ### 节点启动
 ```javascript
 await cnf.net.node.startup();
@@ -72,7 +76,9 @@ await cnf.net.node.startup();
 无
 #### 返回
 Promise-object ，一个promise响应函数，需要await或then来控制顺序。
-<hr />
+
+___
+
 ### 消息广播
 ```javascript
 await cnf.net.msg.brocast(message);
@@ -82,7 +88,8 @@ await cnf.net.msg.brocast(message);
 1. `message` String，需要给全网广播的JSON数据包，会在这个包会透传到网络消息回调函数的data.msg中。
 #### 返回
 Promise-object ，一个promise响应函数，需要await或then来控制顺序。
-<hr />
+___
+
 ### 消息发送
 ```javascript
 await cnf.net.msg.send(socket, message);
@@ -93,3 +100,7 @@ await cnf.net.msg.send(socket, message);
 2. `message` String，需要发送的业务消息
 #### 返回
 Promise-object ，一个promise响应函数，需要await或then来控制顺序。
+
+## 贡献 & 致谢
+广州大学方班🏫
+死鱼姐姐👦
