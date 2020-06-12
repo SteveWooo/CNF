@@ -9,6 +9,14 @@ cd cnf
 npm i
 ```
 ## 部署
+### 使用
+```javascript
+const Cnf = require(`{__dirname}/cnf/Cnf.js`); // 导入库
+```
+```bash
+node startup.js -config config1.json # 启动
+```
+
 ### 配置
 参考 example/mulNodes/config1.json中的配置。
 ##### 重要字段：
@@ -16,16 +24,6 @@ npm i
 2. 😁discoverUdpPort int: 节点发现服务的UDP端口，同一个容器中不可重复
 3. 🔗connectionTcpServerPort int : 节点连接时用的TCP端口，建议与udp端口保持一致
 4. 🌲seed array : 节点种子，启动节点的时候会主动尝试连接seed列表中的节点，然后再依赖节点发现服务，连接更多节点
-
-### 使用
-##### 引入库
-```javascript
-const Cnf = require(`{__dirname}/cnf/Cnf.js`);
-```
-##### 启动命令
-```bash
-node startup.js -config config1.json #配置
-```
 
 ## 文档
 ### 框架主类
