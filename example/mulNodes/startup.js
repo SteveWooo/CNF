@@ -31,7 +31,7 @@ async function main(){
     /**
      * 广播业务数据，由业务自行调用
      */
-    setTimeout(async function(){
+    setInterval(async function(){
         await cnf.net.msg.brocast(JSON.stringify({
             hello : 'world'
         }))

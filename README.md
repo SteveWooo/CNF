@@ -9,23 +9,19 @@ cd cnf
 npm i
 ```
 ## 部署
-### 使用
-```javascript
-const Cnf = require(`{__dirname}/cnf/Cnf.js`); // 导入库
-```
+### 快速开始
 ```bash
-node startup.js -config config1.json # 启动
+node example/mulNodes/startup.js -config example/mulNodes/config1.json # 启动节点1
+node example/mulNodes/startup.js -config example/mulNodes/config2.json # 启动节点2
 ```
-
-### 配置
+## 文档
+### 配置文件
 参考 example/mulNodes/config1.json中的配置。
 ##### 重要字段：
 1. 🔑localPrivateKey char(32) : 每个节点的唯一标示的生成密钥，请保证全局唯一配置
 2. 😁discoverUdpPort int: 节点发现服务的UDP端口，同一个容器中不可重复
 3. 🔗connectionTcpServerPort int : 节点连接时用的TCP端口，建议与udp端口保持一致
 4. 🌲seed array : 节点种子，启动节点的时候会主动尝试连接seed列表中的节点，然后再依赖节点发现服务，连接更多节点
-
-## 文档
 ### 框架主类
 ```javascript
 let cnf = new CNF();
@@ -129,5 +125,5 @@ await cnf.net.msg.send(socket, 'Hello world.');
 ```
 
 ## 贡献 & 致谢
-广州大学方班🏫
-死鱼姐姐👦
+1. 广州大学方班🏫
+2. 死鱼姐姐👦
