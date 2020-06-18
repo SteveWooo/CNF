@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const print = require(`${__dirname}/../utils/print`);
 const argv = require(`${__dirname}/../utils/argv`);
-const Error = require(`${__dirname}/../utils/error`);
+const Error = require(`${__dirname}/../utils/Error`);
 
 module.exports = function(param) {
     let that = this;
