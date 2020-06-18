@@ -20,7 +20,7 @@ async function main(){
     await cnf.net.msg.registerMsgEvent({
         netCallback : async function(data){
             console.log(`receive data : `);
-            console.log(data);
+            console.log(data.msg);
             // 开始你的表演
         }
     })
