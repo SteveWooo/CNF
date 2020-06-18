@@ -1,6 +1,6 @@
 /**
  * Author : Create by SteveWooo at 2020/4/4
- * Updated: 2020/5/29
+ * Updated: 2020/6/18
  * Email  : SteveWoo23@gmail.com
  * Github : https://github.com/stevewooo
  * 这个模块主要是网络模块的内部活动调用。

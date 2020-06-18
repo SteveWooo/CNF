@@ -25,6 +25,7 @@ async function genManyKeys(){
         let keys = sign.genKeys();
         res.push(keys);
     }
+    //
     // fs.writeFileSync(`${__dirname}/keys`, JSON.stringify(res));
 }
 
