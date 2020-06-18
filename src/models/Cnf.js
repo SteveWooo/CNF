@@ -99,6 +99,7 @@ module.exports = function(param) {
      */
     this.utils = {
         print : require(`${__dirname}/../utils/print`),
+        sign : require(`${__dirname}/utils/sign`),
     }
 
     /**
