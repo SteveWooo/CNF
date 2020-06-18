@@ -33,7 +33,7 @@ let build = async function(param){
      * 服务端身份的SOCKET初始化
      */
     let serverSocket = net.createServer(param.callbackFunc.onConnect);
-    serverSocket.listen(global.CNF.CONFIG.net.connectionTcpServerPort, CONFIG.HOST);
+    serverSocket.listen(global.CNF.CONFIG.net.connectionTcpServerPort, global.CNF.CONFIG.net.localhost || CONFIG.HOST);
     global.CNF.net.serverSocket = serverSocket;
     print.info(`Node listen at ${CONFIG.HOST}:${global.CNF.CONFIG.net.connectionTcpServerPort}`);
 }
@@ -47,6 +47,8 @@ function doConnect (node, callbackFunc) {
         let socket = new net.Socket();
         socket.setEncoding('utf8');
         let isConn = false;
+        // console.log('connecting');
+        // console.log(node);
         socket = net.connect(node.tcpport, node.ip, function(){
             // socket.on('error', async function(e) {
             //     await callbackFunc.onError(e, socket);

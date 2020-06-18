@@ -182,7 +182,7 @@ let findNodeModel = {
     },
     findNodeJob : async function(){
         setInterval(async function(){
-            // console.log(global.CNF.net.buckets)
+            // console.log(global.CNF.net.buckets.new[0])
             if(findNodeModel.isFinding == true) {
                 return ;
             }
