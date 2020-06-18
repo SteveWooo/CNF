@@ -235,8 +235,8 @@ let nodeDiscoverModel = {
 
     // 被动discovered
     onMessage : async function(message, remote){
-        console.log(`receive from:`);
-        console.log(remote);
+        // console.log(`receive from:`);
+        // console.log(remote);
         if(nodeDiscoverModel.isDetecting === true) {
             return ;
         }

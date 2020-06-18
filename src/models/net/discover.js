@@ -101,10 +101,13 @@ model.doShake = doShake;
 let receiveNodePing = async function(message, remote) {
     // console.log('receive ping')
     let nodeId = sign.recover(message.signature, message.recid, JSON.stringify(message.msg));
-    let ip = message.msg.from.ip;
+    // let ip = message.msg.from.ip;
+    let ip = remote.address;
     // 双端口统一，这样打洞的时候方便
-    let udpport = message.msg.from.udpport;
-    let tcpport = message.msg.from.tcpport;
+    // let udpport = message.msg.from.udpport;
+    // let tcpport = message.msg.from.tcpport;
+    let udpport = remote.port;
+    let tcpport = remote.port;
     let node = new Node({
         nodeId : nodeId,
         ip : ip,
@@ -140,8 +143,11 @@ model.receiveNodePing = receiveNodePing;
 let receiveNodePong = async function(message, remote) {
     // console.log('receive pong');
     let nodeId = sign.recover(message.signature, message.recid, JSON.stringify(message.msg));
+    // let ip = message.msg.from.ip;
     let ip = remote.address;
     // 双端口统一，这样打洞的时候方便
+    // let udpport = message.msg.from.udpport;
+    // let tcpport = message.msg.from.tcpport;
     let udpport = remote.port;
     let tcpport = remote.port;
 
