@@ -5,6 +5,7 @@
  * Github : https://github.com/stevewooo
  */
 const net = require('net');
+const { config } = require('process');
 const print = require(`${__dirname}/../../utils/print`);
 const Error = require(`${__dirname}/../../utils/Error`);
 const TcpShake = require(`${__dirname}/TcpShake.js`);
@@ -33,9 +34,10 @@ let build = async function(param){
      * 服务端身份的SOCKET初始化
      */
     let serverSocket = net.createServer(param.callbackFunc.onConnect);
-    serverSocket.listen(global.CNF.CONFIG.net.connectionTcpServerPort, global.CNF.CONFIG.net.localhost || CONFIG.HOST);
+    // serverSocket.listen(global.CNF.CONFIG.net.connectionTcpServerPort, global.CNF.CONFIG.net.localhost || CONFIG.HOST);
+    serverSocket.listen(global.CNF.CONFIG.net.connectionTcpServerPort);
     global.CNF.net.serverSocket = serverSocket;
-    print.info(`Node listen at ${CONFIG.HOST}:${global.CNF.CONFIG.net.connectionTcpServerPort}`);
+    print.info(`Node listen at ${global.CNF.CONFIG.net.localhost || CONFIG.HOST}:${global.CNF.CONFIG.net.connectionTcpServerPort}`);
 }
 model.build = build;
 
