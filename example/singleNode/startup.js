@@ -25,7 +25,6 @@ async function main(){
         }
     })
 
-
     /**
      * 启动组网流程，从DNS seed出发寻找所有可用的节点
      */
@@ -34,8 +33,10 @@ async function main(){
     /**
      * 广播业务数据，由业务自行调用
      */
-    // await cnf.net.msg.send({
-    //     msg : {} // 业务数据
-    // })
+    setInterval(async function(){
+        await cnf.net.msg.brocast(JSON.stringify({
+            "I'm" : 'Client'
+        }))
+    }, 4000)
 }
 main()
