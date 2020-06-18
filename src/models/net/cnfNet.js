@@ -214,6 +214,8 @@ let nodeDiscoverModel = {
         if(await model.connection.isNodeAlreadyConnected(node)) {
             return ;
         }
+        // console.log('shake:');
+        // console.log(node);
         await model.discover.doShake(node, model.discover.CONFIG.PING_TYPE);
         return ;
     },
@@ -233,6 +235,8 @@ let nodeDiscoverModel = {
 
     // 被动discovered
     onMessage : async function(message, remote){
+        console.log(`receive from:`);
+        console.log(remote);
         if(nodeDiscoverModel.isDetecting === true) {
             return ;
         }
