@@ -45,7 +45,7 @@ module.exports = function(param) {
         throw new Error(50041);
     }
     // 直接用当前目录
-    globalCNF.CONFIG.DATA_DIR = path.resolve();
+    globalCNF.CONFIG.DATA_DIR = `${path.resolve()}/${globalCNF.argv['datadir']}` || `${path.resolve()}/dataDir`;
 
     /**
      * 全局调用的一些状态
@@ -105,22 +105,18 @@ module.exports = function(param) {
     /**
      * 一些数据库的内部函数入口
      */
-    let cnfDao = {
-        init : require(`${__dirname}/../services/dao/init`),
-    }
+    let cnfDao = require(`${__dirname}/dao/cnfDao`);
 
     /**
      * 对外开放的读写接口，主要针对区块读写和交易缓存读写
      */
-    this.dao = {
-        
-    }
+    this.dao = cnfDao.handle;
 
     /**
      * 在构建函数中统一调用初始化函数。目的是构建global.CNF中的对象数据结构
      */
     this.build = async function(){
-        await cnfDao.init();
+        await cnfDao.build();
         await cnfNet.build();
     }
 

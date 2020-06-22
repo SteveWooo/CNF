@@ -7,7 +7,7 @@
 let Cnf = require(`${__dirname}/../../Cnf.js`);
 
 /**
- * 入口处实例化CNF，保留全局变量global.CNF
+ * 入口处实例化CNF，保留全局变量global.CNF 
  */
 async function main(){
     let cnf = new Cnf({
