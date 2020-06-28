@@ -24,7 +24,7 @@ async function main(){
     })
 
     /**
-     * 启动组网流程，从DNS seed出发寻找所有可用的节点
+     * 启动组网流程，从seed出发寻找所有可用的节点
      */
     await cnf.net.node.startup();
 
