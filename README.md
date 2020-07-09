@@ -36,9 +36,7 @@ let cnf = new CNF();
 ___
 
 ### 框架主类构建函数
-```javascript
-cnf.build();
-```
+#### cnf.build();
 完成主类接口的各种初始化，包括全局变量初始化，socket初始化等等
 #### 参数
 无
@@ -52,11 +50,9 @@ await cnf.build();
 ___
 
 ### 网络消息回调函数注册
-```javascript
-cnf.net.msg.registerMsgEvent({
-    netCallback : async function
-})
-```
+
+#### cnf.net.msg.registerMsgEvent()
+
 注册消息回调函数，主要响应p2p网络上的数据包给业务方使用。这里也是业务方进行共识协议开发的核心函数。
 
 #### 参数
@@ -76,9 +72,8 @@ await cnf.net.msg.registerMsgEvent({
 ___
 
 ### 节点启动
-```javascript
-cnf.net.node.startup();
-```
+#### cnf.net.node.startup();
+
 启动节点的发现服务，连接服务，数据转发与透传业务方的服务。
 #### 参数
 无
@@ -92,9 +87,9 @@ await cnf.net.node.startup();
 ___
 
 ### 消息广播
-```javascript
-cnf.net.msg.brocast(message);
-```
+
+#### cnf.net.msg.brocast();
+
 广播消息给p2p全网节点
 #### 参数
 1. `message` String，需要给全网广播的JSON数据包，会在这个包会透传到网络消息回调函数的data.msg中。
@@ -111,9 +106,9 @@ await cnf.net.msg.brocast(JSON.stringify({
 ___
 
 ### 消息发送
-```javascript
-await cnf.net.msg.send(socket, message);
-```
+
+#### cnf.net.msg.send();
+
 把数据推到指定的socket上并发送出去，其中要求socket在本节点已经连接的节点池中。
 #### 参数
 1. `socket`  socket handle，节点池中的socket
