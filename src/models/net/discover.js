@@ -123,7 +123,6 @@ let receiveNodePing = async function(message, remote) {
         }
     }
 
-    
     // 如果已经在doing shake的，也要先回pong，然后再重复回一遍ping，以防对方漏了回pong，或者自己被锁了，也不好说。
     // 总之只要桶里没有这个节点，就不断pong后ping。等别人pong回来了，就可以入桶了。
     if(global.CNF.net.discover.doingShake[nodeId] == undefined) {

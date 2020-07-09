@@ -124,7 +124,7 @@ let nodeServerModel = {
  * 节点连接服务的目的是从bucket中寻找节点出来进行连接，从而填充outBound连接池
  */
 let findNodeModel = {
-    isFinding : false, // 锁
+    isFinding : false, // 锁 
 
     onMessage : async function(data, socket) {
         let result = await receiveTcpMsgModel.onMessage(socket, data, 'outBoundNodeMsg');
