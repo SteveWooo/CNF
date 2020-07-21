@@ -16,7 +16,7 @@ let handle = {
 }
 model.handle = handle;
 
-/**
+/** 
  * 主要目的是构建基础数据目录，文件树架构。每次启动都要构建一趟，每个文件创建都独立trycatch，保证文件是动态建立的。
  */
 let build = async function(){
