@@ -1,6 +1,6 @@
 /**
  * Author : Create by SteveWooo at 2020/4/4
- * Updated: 2020/6/18
+ * Updated: 2020/6/29
  * Email  : SteveWoo23@gmail.com
  * Github : https://github.com/stevewooo
  */
@@ -15,7 +15,7 @@ module.exports = function(param) {
     let that = this;
     param = param || {};
     /**
-     * 这个对象存全局，文档要说明这个全局对象不能覆盖
+     * 这个对象存全局，文档要说明这个全局对象不能覆盖 
      */
     let globalCNF = {};
     // 禁止重复创建对象。
