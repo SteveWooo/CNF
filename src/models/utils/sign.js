@@ -109,3 +109,12 @@ exports.recover = function(signature, recid, msg){
     }
     return publicKey;
 }
+
+/**
+ * 获取哈希数据
+ * @param {String} msg
+ */
+exports.hash = function(msg) {
+    msg = crypto.createHash('sha256').update(msg).digest('hex');
+    return msg;
+}

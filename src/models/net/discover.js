@@ -50,7 +50,7 @@ let build = async function(param){
     // 绑定端口，这里会触发listening回调
     globalDiscover.udpSocket.bind(global.CNF.CONFIG.net.discoverUdpPort);
 
-    global.CNF.net.discover = globalDiscover;
+    global.CNF.netData.discover = globalDiscover;
 
     // 第一次进来，把配置里面的seed全部加到邻居列表里面。
     let neighbors = global.CNF.CONFIG.net.seed;
@@ -72,7 +72,7 @@ model.build = build;
  */
 let shakeNode = function(shakeData) {
     return new Promise(resolve=>{
-        global.CNF.net.discover.udpSocket.send(shakeData.data, shakeData.node.udpport, shakeData.node.ip, (err)=>{
+        global.CNF.netData.discover.udpSocket.send(shakeData.data, shakeData.node.udpport, shakeData.node.ip, (err)=>{
             resolve();
         })
     })
@@ -86,7 +86,7 @@ let doShake = async function(node, type) {
     let shakeData = new Shake(node, type);
     await shakeNode(shakeData);
     if(type == 1) {
-        global.CNF.net.discover.doingShake[node.nodeId] = shakeData;
+        global.CNF.netData.discover.doingShake[node.nodeId] = shakeData;
     }
 }
 model.doShake = doShake;
@@ -115,7 +115,7 @@ let receiveNodePing = async function(message, remote) {
         tcpport : tcpport
     })
 
-    if(global.CNF.net.discover.doingShake[nodeId] != undefined) {
+    if(global.CNF.netData.discover.doingShake[nodeId] != undefined) {
         return {
             node : node,
             doShakeType : CONFIG.PONG_TYPE,
@@ -125,7 +125,7 @@ let receiveNodePing = async function(message, remote) {
 
     // 如果已经在doing shake的，也要先回pong，然后再重复回一遍ping，以防对方漏了回pong，或者自己被锁了，也不好说。
     // 总之只要桶里没有这个节点，就不断pong后ping。等别人pong回来了，就可以入桶了。
-    if(global.CNF.net.discover.doingShake[nodeId] == undefined) {
+    if(global.CNF.netData.discover.doingShake[nodeId] == undefined) {
         return {
             node : node,
             doShakeType : CONFIG.PONGPING_TYPE,
@@ -158,8 +158,8 @@ let receiveNodePong = async function(message, remote) {
     })
 
     // 完成握手，加桶里
-    if(global.CNF.net.discover.doingShake[nodeId] != undefined) {
-        delete global.CNF.net.discover.doingShake[nodeId];
+    if(global.CNF.netData.discover.doingShake[nodeId] != undefined) {
+        delete global.CNF.netData.discover.doingShake[nodeId];
         return {
             node : node,
             doShakeType : null,
@@ -168,7 +168,7 @@ let receiveNodePong = async function(message, remote) {
     }
 
     // 莫名其妙收到的pong，而且不在我们doingShake里面的，不需要理会
-    if(global.CNF.net.discover.doingShake[nodeId] == undefined) {
+    if(global.CNF.netData.discover.doingShake[nodeId] == undefined) {
         return {
             node : node,
             doShakeType : null,
@@ -180,7 +180,7 @@ model.receiveNodePong = receiveNodePong;
 
 /**
  * 收到别人分享的邻居包
- * 这里要把邻居节点排重加入global.CNF.net.discover.neighbor里面，需要排重
+ * 这里要把邻居节点排重加入global.CNF.netData.discover.neighbor里面，需要排重
  */
 let receiveNodeNeighbor = async function(message, remote) {
     
@@ -192,8 +192,8 @@ model.receiveNodeNeighbor = receiveNodeNeighbor;
  */
 let isNodeAlreadyInNeighbor = async function(node) {
     let flag = false;
-    for(var i=0;i<global.CNF.net.discover.neighbor.length;i++) {
-        if(node.nodeId == global.CNF.net.discover.neighbor[i].nodeId) {
+    for(var i=0;i<global.CNF.netData.discover.neighbor.length;i++) {
+        if(node.nodeId == global.CNF.netData.discover.neighbor[i].nodeId) {
             flag = true;
             return flag;
         }
@@ -207,15 +207,15 @@ model.isNodeAlreadyInNeighbor = isNodeAlreadyInNeighbor;
  * 如果邻居列表为空，就找种子列表。
  */
 let getNeighbor = async function() {
-    let node = global.CNF.net.discover.neighbor[0];
+    let node = global.CNF.netData.discover.neighbor[0];
     return node;
 }
 model.getNeighbor = getNeighbor;
 
 let deleteNeighbor = async function(node) {
-    for(var i=0;i<global.CNF.net.discover.neighbor.length;i++) {
-        if(global.CNF.net.discover.neighbor[i].nodeId == node.nodeId) {
-            global.CNF.net.discover.neighbor.splice(i, 1);
+    for(var i=0;i<global.CNF.netData.discover.neighbor.length;i++) {
+        if(global.CNF.netData.discover.neighbor[i].nodeId == node.nodeId) {
+            global.CNF.netData.discover.neighbor.splice(i, 1);
             i--;
         }
     }
@@ -227,13 +227,13 @@ model.deleteNeighbor = deleteNeighbor;
  * 把节点放入邻居的操作
  */
 let addNodeToNeighbor = async function(node) {
-    if(global.CNF.net.discover.neighbor.length >= CONFIG.NEIGHBOR_LENGTH) {
+    if(global.CNF.netData.discover.neighbor.length >= CONFIG.NEIGHBOR_LENGTH) {
         return ;
     }
     if(await isNodeAlreadyInNeighbor(node)) {
         return ;
     }
-    global.CNF.net.discover.neighbor.push(node);
+    global.CNF.netData.discover.neighbor.push(node);
     return ;
 }
 model.addNodeToNeighbor = addNodeToNeighbor;

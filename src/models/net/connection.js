@@ -28,7 +28,7 @@ let build = async function(param){
         temp : []
     };
 
-    global.CNF.net.connections = globalConnection;
+    global.CNF.netData.connections = globalConnection;
 
     /**
      * 服务端身份的SOCKET初始化
@@ -36,7 +36,7 @@ let build = async function(param){
     let serverSocket = net.createServer(param.callbackFunc.onConnect);
     // serverSocket.listen(global.CNF.CONFIG.net.connectionTcpServerPort, global.CNF.CONFIG.net.localhost || CONFIG.HOST);
     serverSocket.listen(global.CNF.CONFIG.net.connectionTcpServerPort);
-    global.CNF.net.serverSocket = serverSocket;
+    global.CNF.netData.serverSocket = serverSocket;
     print.info(`Node listen at ${global.CNF.CONFIG.net.localhost || CONFIG.HOST}:${global.CNF.CONFIG.net.connectionTcpServerPort}`);
 }
 model.build = build;
@@ -74,7 +74,7 @@ function doConnect (node, callbackFunc) {
     })
 }
 let tryOutBoundConnect = async function(node, callbackFunc){
-    if(global.CNF.net.connections.outBound.length >= CONFIG.MAX_OUTBOUND) {
+    if(global.CNF.netData.connections.outBound.length >= CONFIG.MAX_OUTBOUND) {
         return ;
     }
     // 这么连接别的节点就行了。
@@ -108,22 +108,22 @@ model.tcpShakeBack = tcpShakeBack;
  */
 let isNodeAlreadyConnected = async function(node){
     let found = false;
-    for(var i=0;i<global.CNF.net.connections.outBound.length;i++) {
-        if(node.nodeId == global.CNF.net.connections.outBound[i].node.nodeId) {
+    for(var i=0;i<global.CNF.netData.connections.outBound.length;i++) {
+        if(node.nodeId == global.CNF.netData.connections.outBound[i].node.nodeId) {
             found = true;
             return found;
         }
     }
-    for(var i=0;i<global.CNF.net.connections.inBound.length;i++) {
-        if(node.nodeId == global.CNF.net.connections.inBound[i].node.nodeId) {
+    for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
+        if(node.nodeId == global.CNF.netData.connections.inBound[i].node.nodeId) {
             found = true;
             return found;
         }
     }
     
     // 正在尝试进行连接的node也要检测一下, 人家正在连接, 就不要再连人家了.
-    for(var i=0;i<global.CNF.net.buckets.trying.length;i++) {
-        if(node.nodeId == global.CNF.net.buckets.trying[i].nodeId) {
+    for(var i=0;i<global.CNF.netData.buckets.trying.length;i++) {
+        if(node.nodeId == global.CNF.netData.buckets.trying[i].nodeId) {
             found = true;
             return found;
         }
@@ -138,14 +138,14 @@ model.isNodeAlreadyConnected = isNodeAlreadyConnected;
  */
 let isAlreadyTcpShake = async function(socket) {
     let found = false;
-    for(var i=0;i<global.CNF.net.connections.outBound.length;i++) {
-        if(socket == global.CNF.net.connections.outBound[i].socket) {
+    for(var i=0;i<global.CNF.netData.connections.outBound.length;i++) {
+        if(socket == global.CNF.netData.connections.outBound[i].socket) {
             found = true;
             return found;
         }
     }
-    for(var i=0;i<global.CNF.net.connections.inBound.length;i++) {
-        if(socket == global.CNF.net.connections.inBound[i].socket) {
+    for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
+        if(socket == global.CNF.netData.connections.inBound[i].socket) {
             found = true;
             return found;
         }
@@ -160,10 +160,10 @@ model.isAlreadyTcpShake = isAlreadyTcpShake;
  */
 let pushMsgPool = async function(data){
     // 满了就不放了
-    if(global.CNF.net.msgPool.length >= CONFIG.MSG_POOL_LENGTH) {
+    if(global.CNF.netData.msgPool.length >= CONFIG.MSG_POOL_LENGTH) {
         return ;
     }
-    global.CNF.net.msgPool.push(data);
+    global.CNF.netData.msgPool.push(data);
     return ;
 }
 model.pushMsgPool = pushMsgPool;
@@ -173,7 +173,7 @@ model.pushMsgPool = pushMsgPool;
  */
 let getMsgPool = async function(){
     // todo 先检查是否在Inbound和outBound的节点,不在的话,不要拿出来.
-    let msg = global.CNF.net.msgPool.shift();
+    let msg = global.CNF.netData.msgPool.shift();
     if(msg != undefined) {
         // console.log(msg);
     }
@@ -185,10 +185,10 @@ model.getMsgPool = getMsgPool;
  * 插入被链接的INBOUND OUTBOUND SOCKET
  */
 let pushInBoundConnection = async function(socket, node) {
-    if(global.CNF.net.connections.inBound.legnth >= CONFIG.MAX_INBOUND) {
+    if(global.CNF.netData.connections.inBound.legnth >= CONFIG.MAX_INBOUND) {
         return ;
     }
-    global.CNF.net.connections.inBound.push({
+    global.CNF.netData.connections.inBound.push({
         node : node,
         socket: socket
     });
@@ -196,10 +196,10 @@ let pushInBoundConnection = async function(socket, node) {
 model.pushInBoundConnection = pushInBoundConnection;
 
 let pushOutBoundConnection = async function(socket, node) {
-    if(global.CNF.net.connections.outBound.legnth >= CONFIG.MAX_OUTBOUND) {
+    if(global.CNF.netData.connections.outBound.legnth >= CONFIG.MAX_OUTBOUND) {
         return ;
     }
-    global.CNF.net.connections.outBound.push({
+    global.CNF.netData.connections.outBound.push({
         node : node,
         socket: socket
     });
@@ -213,10 +213,10 @@ model.pushOutBoundConnection = pushOutBoundConnection;
  * TODO: 在这里做一下ip&端口排重
  */
 let pushTempConnection = async function(socket, node) {
-    if(global.CNF.net.connections.temp.legnth >= CONFIG.MAX_TEMP) {
+    if(global.CNF.netData.connections.temp.legnth >= CONFIG.MAX_TEMP) {
         return ;
     }
-    global.CNF.net.connections.temp.push({
+    global.CNF.netData.connections.temp.push({
         node: node,
         socket: socket
     });
@@ -228,16 +228,16 @@ model.pushTempConnection = pushTempConnection;
  * 当连接断开时，需要把inBound outBound的对应socket删除。
  */
 let deleteSocket = async function(socket) {
-    for(var i=0;i<global.CNF.net.connections.outBound.length;i++) {
-        if(socket == global.CNF.net.connections.outBound[i].socket) {
-            let conn = global.CNF.net.connections.outBound.splice(i, 1)[0];
+    for(var i=0;i<global.CNF.netData.connections.outBound.length;i++) {
+        if(socket == global.CNF.netData.connections.outBound[i].socket) {
+            let conn = global.CNF.netData.connections.outBound.splice(i, 1)[0];
             return conn.node;
         }
     }
 
-    for(var i=0;i<global.CNF.net.connections.inBound.length;i++) {
-        if(socket == global.CNF.net.connections.inBound[i].socket) {
-            let conn = global.CNF.net.connections.inBound.splice(i, 1)[0];
+    for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
+        if(socket == global.CNF.netData.connections.inBound[i].socket) {
+            let conn = global.CNF.netData.connections.inBound.splice(i, 1)[0];
             return conn.node;
         }
     }
@@ -254,9 +254,9 @@ model.deleteSocket = deleteSocket;
  */
 let finishTcpShake = async function(socket, node, fromType) {
     let targetSocket = undefined;
-    for(var i=0;i<global.CNF.net.connections.temp.length;i++) {
-        if(global.CNF.net.connections.temp[i].socket == socket) {
-            targetSocket = global.CNF.net.connections.temp.splice(i, 1);
+    for(var i=0;i<global.CNF.netData.connections.temp.length;i++) {
+        if(global.CNF.netData.connections.temp[i].socket == socket) {
+            targetSocket = global.CNF.netData.connections.temp.splice(i, 1);
             break;
         }
     }
@@ -268,14 +268,14 @@ let finishTcpShake = async function(socket, node, fromType) {
      * 如果这个nodeId已经在inBound outBound, 或者outBoundTrying里面了, 就断掉8
      * 这是一个锁
      */
-    for(var i=0;i<global.CNF.net.connections.inBound.length;i++) {
-        if(global.CNF.net.connections.inBound[i].node.nodeId == node.nodeId) {
+    for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
+        if(global.CNF.netData.connections.inBound[i].node.nodeId == node.nodeId) {
             socket.destroy();
             return ;
         }
     }
-    for(var i=0;i<global.CNF.net.connections.outBound.length;i++) {
-        if(global.CNF.net.connections.outBound[i].node.nodeId == node.nodeId) {
+    for(var i=0;i<global.CNF.netData.connections.outBound.length;i++) {
+        if(global.CNF.netData.connections.outBound[i].node.nodeId == node.nodeId) {
             socket.destroy();
             return ;
         }
@@ -296,11 +296,11 @@ model.finishTcpShake = finishTcpShake;
  * 广播BUSS消息
  */
 let brocast = async function(data){
-    for(var i=0;i<global.CNF.net.connections.inBound.length;i++) {
-        global.CNF.net.connections.inBound[i].socket.write(data);
+    for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
+        global.CNF.netData.connections.inBound[i].socket.write(data);
     }
-    for(var i=0;i<global.CNF.net.connections.outBound.length;i++) {
-        global.CNF.net.connections.outBound[i].socket.write(data);
+    for(var i=0;i<global.CNF.netData.connections.outBound.length;i++) {
+        global.CNF.netData.connections.outBound[i].socket.write(data);
     }
     // console.log('done brocast');
 }

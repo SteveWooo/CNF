@@ -17,6 +17,8 @@ let model = {
     connection : require(`${__dirname}/connection`),
     discover : require(`${__dirname}/discover`),
 
+    brocastPool : require(`${__dirname}/brocastPool`),
+
     // 子对象类
     Node : require(`${__dirname}/Node`)
 }
@@ -61,6 +63,49 @@ let receiveTcpMsgModel = {
                 socket : socket,
                 msg : data
             });
+        },
+        brocastEvent : async function(socket, data, fromType) {
+            if(!(await model.connection.isAlreadyTcpShake(socket))) {
+                return ;
+            }
+
+            let now = +new Date()
+            // 十分钟之前的数据包不做处理
+            if (now - data.originMsg.createAt >= 10 * 60 * 1000) {
+                return ;
+            }
+
+            // 判断在不在缓存里面，如果在，说明已经转发过，不需要处理了
+            if (model.brocastPool.isCached(socket, data, fromType) == true) {
+                return ;
+            }
+
+            // 让业务读数据
+            await model.connection.pushMsgPool({
+                fromType : fromType,
+                socket : socket,
+                msg : data
+            });
+
+            // 转发到所有已知节点
+            let transData = {
+                event : 'brocastEvent',
+                // 保留原始信息
+                originMsg : data.originMsg,
+                // 放置发送方消息
+                from : {
+                    nodeInfo : {
+                        nodeId : global.CNF.netData.nodeId
+                    },
+                    createAt : now
+                },
+                hop : data.hop + 1
+            }
+            transData = JSON.stringify(transData);
+            await model.connection.brocast(transData);
+
+            // 放入池子里，下次收到这条信息就不转发了
+            model.brocastPool.pushCache(socket, data, fromType);
         }
     },
 
@@ -182,7 +227,7 @@ let findNodeModel = {
     },
     findNodeJob : async function(){
         setInterval(async function(){
-            // console.log(global.CNF.net.buckets.new[0])
+            // console.log(global.CNF.netData.buckets.new[0])
             if(findNodeModel.isFinding == true) {
                 return ;
             }
@@ -203,7 +248,7 @@ let nodeDiscoverModel = {
      */
     // 主动discover
     detect : async function(){
-        // console.log(global.CNF.net.buckets.new[0]);
+        // console.log(global.CNF.netData.buckets.new[0]);
         let node = await model.discover.getNeighbor();
         if(node == undefined) {
             return ;
@@ -315,11 +360,6 @@ let handle = function(){
                 if((typeof param.netCallback) !== 'function') {
                     throw Error(5004, 'netCallback 参数错误');
                 }
-                // let serverSocket = await nodeServerModel.initServer({
-                //     port : global.CNF.CONFIG.net.connectionTcpServerPort,
-                //     netCallback : param.netCallback
-                // });
-                // global.CNF.net.serverSocket = serverSocket;
                 
                 // 定期捞msgPool里面的东西出来回调给业务方。
                 setInterval(async function(){
@@ -334,12 +374,33 @@ let handle = function(){
                 return ;
             },
 
-            // 广播一段bussEvent消息
+            // 广播一段bussEvent消息，这是主动发送的广播数据包格式。上面brocastEvent中有被动转发的brocast包格式。
             brocast : async function(msg){
+                let now = +new Date();
                 let data = {
-                    event : 'bussEvent',
-                    msg : msg
+                    event : 'brocastEvent',
+                    // 保留原始信息
+                    originMsg : {
+                        hash : global.CNF.utils.sign.hash(msg + now),
+                        msg : msg,
+                        createAt : now,
+                        nodeInfo : {
+                            nodeId : global.CNF.netData.nodeId
+                        }
+                    },
+                    // 放置发送方消息
+                    from : {
+                        nodeInfo : {
+                            nodeId : global.CNF.netData.nodeId
+                        },
+                        createAt : now
+                    },
+                    // 消息包转发跳数，第一个包发出去代表0跳，因为传播了0个节点。
+                    hop : 0
                 }
+                // 放入池子里，下次收到这条信息就不转发了
+                model.brocastPool.pushCache(undefined, data, undefined);
+
                 data = JSON.stringify(data);
                 await model.connection.brocast(data);
             },
@@ -389,8 +450,8 @@ function getLocalNodeId(){
  */
 let build = async function(){
     // NodeId的生成，核心逻辑，不分装了。
-    global.CNF.net.nodeId = getLocalNodeId();
-    print.info(`NodeId: ${global.CNF.net.nodeId}`);
+    global.CNF.netData.nodeId = getLocalNodeId();
+    print.info(`NodeId: ${global.CNF.netData.nodeId}`);
 
     // 配合节点发现服务的bucket
     await model.bucket.build();

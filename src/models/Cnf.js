@@ -57,7 +57,7 @@ module.exports = function(param) {
     /**
      * 全局网络状态
      */
-    globalCNF.net = {
+    globalCNF.netData = {
         // 节点唯一标识
         nodeId : '',
 
@@ -79,6 +79,11 @@ module.exports = function(param) {
         msgPool : [],
 
         /**
+         * 广播消息的缓存，防止广播风暴
+         */
+        brocastCache : [],
+
+        /**
          * 路由桶，主要为寻址服务
          * 这个数据结构在cnfNet中做详细的初始化，以那个函数的数据结构为准。
          */
@@ -92,12 +97,12 @@ module.exports = function(param) {
      * 并注入对业务方开放的handle部分
      */
     let cnfNet = require(`${__dirname}/net/cnfNet`);
-    this.net = cnfNet.handle();
+    global.CNF.net = cnfNet.handle();
     
     /**
      * 集成常用工具库，需要根据具体项目实施
      */
-    this.utils = {
+    global.CNF.utils = {
         print : require(`${__dirname}/../utils/print`),
         sign : require(`${__dirname}/utils/sign`),
     }
@@ -110,15 +115,15 @@ module.exports = function(param) {
     /**
      * 对外开放的读写接口，主要针对区块读写和交易缓存读写
      */
-    this.dao = cnfDao.handle;
+    global.CNF.dao = cnfDao.handle;
 
     /**
      * 在构建函数中统一调用初始化函数。目的是构建global.CNF中的对象数据结构
      */
-    this.build = async function(){
+    global.CNF.build = async function(){
         await cnfDao.build();
         await cnfNet.build();
     }
 
-    return this;
+    return global.CNF;
 }

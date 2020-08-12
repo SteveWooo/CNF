@@ -33,7 +33,7 @@ let build = async function(){
 
     // todo 读取本地路由信息
 
-    global.CNF.net.buckets = globalBuckets;
+    global.CNF.netData.buckets = globalBuckets;
 }
 model.build = build;
 
@@ -41,7 +41,7 @@ model.build = build;
  * 从某个桶里面随机抽取一个节点出来的函数在这里
  */
 let getNodeFromBucket = async function(bucketName) {
-    let bucket = global.CNF.net.buckets[bucketName];
+    let bucket = global.CNF.netData.buckets[bucketName];
     let nodes = [];
     for(var i=0;i<bucket.length;i++) {
         for(var k=0;k<bucket[i].length;k++) {
@@ -63,26 +63,26 @@ model.getNodeFromBucket = getNodeFromBucket;
  */
 let isNodeAlreadyInBucket = async function(node) {
     let flag = false;
-    for(var i=0;i<global.CNF.net.buckets.tried.length;i++) {
-        for(var k=0;k<global.CNF.net.buckets.tried[i].length;k++) {
-            if(node.nodeId == global.CNF.net.buckets.tried[i][k].nodeId) {
+    for(var i=0;i<global.CNF.netData.buckets.tried.length;i++) {
+        for(var k=0;k<global.CNF.netData.buckets.tried[i].length;k++) {
+            if(node.nodeId == global.CNF.netData.buckets.tried[i][k].nodeId) {
                 flag = true;
                 return flag;
             }
         }
     }
 
-    for(var i=0;i<global.CNF.net.buckets.new.length;i++) {
-        for(var k=0;k<global.CNF.net.buckets.new[i].length;k++) {
-            if(node.nodeId == global.CNF.net.buckets.new[i][k].nodeId) {
+    for(var i=0;i<global.CNF.netData.buckets.new.length;i++) {
+        for(var k=0;k<global.CNF.netData.buckets.new[i].length;k++) {
+            if(node.nodeId == global.CNF.netData.buckets.new[i][k].nodeId) {
                 flag = true;
                 return flag;
             }
         }
     }
 
-    for(var i=0;i<global.CNF.net.buckets.trying.length;i++) {
-        if(node.nodeId == global.CNF.net.buckets.trying[i].nodeId) {
+    for(var i=0;i<global.CNF.netData.buckets.trying.length;i++) {
+        if(node.nodeId == global.CNF.netData.buckets.trying[i].nodeId) {
             flag = true;
             return flag;
         }
@@ -97,9 +97,9 @@ model.isNodeAlreadyInBucket = isNodeAlreadyInBucket;
  */
 let addTryingNodeToTried = async function(node){
     let tryNode = undefined;
-    for(var i=0;i<global.CNF.net.buckets.trying.length;i++) {
-        if(node.nodeId == global.CNF.net.buckets.trying[i].nodeId) {
-            tryNode = global.CNF.net.buckets.trying.splice(i, 1)[0];
+    for(var i=0;i<global.CNF.netData.buckets.trying.length;i++) {
+        if(node.nodeId == global.CNF.netData.buckets.trying[i].nodeId) {
+            tryNode = global.CNF.netData.buckets.trying.splice(i, 1)[0];
             break;
         }
     }
@@ -108,13 +108,13 @@ let addTryingNodeToTried = async function(node){
     }
 
     // todo
-    global.CNF.net.buckets.tried[0].push(tryNode);
+    global.CNF.netData.buckets.tried[0].push(tryNode);
 }
 let addNodeToNew = async function(node){
     let flag = false;
-    for(var i=0;i<global.CNF.net.buckets.new.length;i++) {
-        for(var k=0;k<global.CNF.net.buckets.new[i].length;k++) {
-            if(node.nodeId == global.CNF.net.buckets.new[i][k].nodeId) {
+    for(var i=0;i<global.CNF.netData.buckets.new.length;i++) {
+        for(var k=0;k<global.CNF.netData.buckets.new[i].length;k++) {
+            if(node.nodeId == global.CNF.netData.buckets.new[i][k].nodeId) {
                 flag = true;
             }
         }
@@ -123,7 +123,7 @@ let addNodeToNew = async function(node){
         return ;
     }
     // todo
-    global.CNF.net.buckets.new[0].push(node);
+    global.CNF.netData.buckets.new[0].push(node);
 }
 model.addNodeToNew = addNodeToNew;
 model.addTryingNodeToTried = addTryingNodeToTried;
@@ -134,37 +134,50 @@ model.addTryingNodeToTried = addTryingNodeToTried;
  */
 let tryConnectNode = async function(node) {
     let tryNode = undefined;
-    for(var i=0;i<global.CNF.net.buckets.new.length;i++) {
-        for(var k=0;k<global.CNF.net.buckets.new[i].length;k++) {
-            if(node.nodeId == global.CNF.net.buckets.new[i][k].nodeId) {
-                tryNode = global.CNF.net.buckets.new[i].splice(k, 1)[0];
+
+    /**
+     * 首先检查新桶里面有没有这个尝试连接的Node
+     */
+    for(var i=0;i<global.CNF.netData.buckets.new.length;i++) {
+        for(var k=0;k<global.CNF.netData.buckets.new[i].length;k++) {
+            if(node.nodeId == global.CNF.netData.buckets.new[i][k].nodeId) {
+                tryNode = global.CNF.netData.buckets.new[i].splice(k, 1)[0];
                 break;
             }
         }
     }
+
+    /**
+     * 然后检查tried桶里有没有这个Node
+     */
     if(tryNode == undefined) {
-        for(var i=0;i<global.CNF.net.buckets.tried.length;i++) {
-            for(var k=0;k<global.CNF.net.buckets.tried[i].length;k++) {
-                if(node.nodeId == global.CNF.net.buckets.tried[i][k].nodeId) {
-                    tryNode = global.CNF.net.buckets.tried[i].splice(k, 1)[0];
+        for(var i=0;i<global.CNF.netData.buckets.tried.length;i++) {
+            for(var k=0;k<global.CNF.netData.buckets.tried[i].length;k++) {
+                if(node.nodeId == global.CNF.netData.buckets.tried[i][k].nodeId) {
+                    tryNode = global.CNF.netData.buckets.tried[i].splice(k, 1)[0];
                     break;
                 }
             }
         }
     }
+
+    /**
+     * 最后检查正常尝试的桶里面有没有这个Node
+     */
     if(tryNode == undefined) {
-        for(var i=0;i<global.CNF.net.buckets.trying.length;i++) {
-            if(node.nodeId == global.CNF.net.buckets.trying[i].nodeId) {
-                tryNode = global.CNF.net.buckets.trying.splice(i, 1)[0];
+        for(var i=0;i<global.CNF.netData.buckets.trying.length;i++) {
+            if(node.nodeId == global.CNF.netData.buckets.trying[i].nodeId) {
+                tryNode = global.CNF.netData.buckets.trying.splice(i, 1)[0];
                 break;
             }
         }
     }
+
     if(tryNode == undefined) {
         throw new Error(5000, 'bucket.js, tryConnectNode');
     }
 
-    global.CNF.net.buckets.trying.push(tryNode);
+    global.CNF.netData.buckets.trying.push(tryNode);
     return ;
 }
 model.tryConnectNode = tryConnectNode;

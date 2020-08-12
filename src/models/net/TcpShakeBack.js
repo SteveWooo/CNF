@@ -20,7 +20,7 @@ function Shake(){
     let msg = {
         ts : now,
         from : {
-            nodeId : global.CNF.net.nodeId,
+            nodeId : global.CNF.netData.nodeId,
             ip : global.CNF.CONFIG.net.localhost,
             tcpport : global.CNF.CONFIG.net.connectionTcpServerPort,
             udpport : global.CNF.CONFIG.net.discoverUdpPort,

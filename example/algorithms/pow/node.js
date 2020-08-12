@@ -5,20 +5,20 @@
  * Github : https://github.com/stevewooo
  */
 
-const Cnf = require(`${__dirname}/../../Cnf.js`);
+const Cnf = require(`${__dirname}/../../../Cnf.js`);
 
 /**
  * 入口处实例化CNF，保留全局变量global.CNF 
  */
 async function main(){
     let cnf = new Cnf({
-        config: require(`${__dirname}/config.json`)
+        config: require(`${__dirname}/config${process.argv[2]}.json`)
     });
     await cnf.build();
     /**
      * 注册网络消息事件回调，netCallback函数为业务主要函数的入口
      */
-    await cnf.net.msg.registerMsgEvent({
+    await CNF.net.msg.registerMsgEvent({
         netCallback : async function(data){
             console.log(`receive data : `);
             console.log(data.msg);
@@ -29,15 +29,21 @@ async function main(){
     /**
      * 启动组网
      */
-    await cnf.net.node.startup();
+    await CNF.net.node.startup();
 
     /**
      * 广播业务数据
      */
     // setInterval(async function(){
-    //     await cnf.net.msg.brocast(JSON.stringify({
+    //     await CNF.net.msg.brocast(JSON.stringify({
     //         "I'm" : 'Client'
     //     }))
     // }, 4000)
+
+    setTimeout(async function(){
+        await CNF.net.msg.brocast(JSON.stringify({
+            "I'm" : 'Client: ' + process.argv[2]
+        }))
+    }, 8000)
 }
 main()

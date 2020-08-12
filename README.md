@@ -51,7 +51,7 @@ ___
 
 ### 网络消息回调函数注册
 
-#### cnf.net.msg.registerMsgEvent()
+#### CNF.netData.msg.registerMsgEvent()
 
 注册消息回调函数，主要响应p2p网络上的数据包给业务方使用。这里也是业务方进行共识协议开发的核心函数。
 
@@ -63,7 +63,7 @@ Promise-object ，一个promise响应函数，需要await或then来控制顺序�
 
 #### 示范
 ```javascript
-await cnf.net.msg.registerMsgEvent({
+await CNF.netData.msg.registerMsgEvent({
     netCallback : async function(data){
         console.log(data.msg);
     }
@@ -72,7 +72,7 @@ await cnf.net.msg.registerMsgEvent({
 ___
 
 ### 节点启动
-#### cnf.net.node.startup();
+#### CNF.netData.node.startup();
 
 启动节点的发现服务，连接服务，数据转发与透传业务方的服务。
 #### 参数
@@ -82,13 +82,13 @@ Promise-object ，一个promise响应函数，需要await或then来控制顺序�
 
 #### 示范
 ```javascript
-await cnf.net.node.startup();
+await CNF.netData.node.startup();
 ```
 ___
 
 ### 消息广播
 
-#### cnf.net.msg.brocast();
+#### CNF.netData.msg.brocast();
 
 广播消息给p2p全网节点
 #### 参数
@@ -98,7 +98,7 @@ Promise-object ，一个promise响应函数，需要await或then来控制顺序�
 
 #### 示范
 ```javascript
-await cnf.net.msg.brocast(JSON.stringify({
+await CNF.netData.msg.brocast(JSON.stringify({
     hello : 'world'
 }))
 ```
@@ -107,7 +107,7 @@ ___
 
 ### 消息发送
 
-#### cnf.net.msg.send();
+#### CNF.netData.msg.send();
 
 把数据推到指定的socket上并发送出去，其中要求socket在本节点已经连接的节点池中。
 #### 参数
