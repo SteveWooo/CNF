@@ -207,7 +207,8 @@ model.isNodeAlreadyInNeighbor = isNodeAlreadyInNeighbor;
  * 如果邻居列表为空，就找种子列表。
  */
 let getNeighbor = async function() {
-    let node = global.CNF.netData.discover.neighbor[0];
+    let index = Math.floor(Math.random() * global.CNF.netData.discover.neighbor.length)
+    let node = global.CNF.netData.discover.neighbor[index];
     return node;
 }
 model.getNeighbor = getNeighbor;

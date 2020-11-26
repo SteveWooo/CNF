@@ -5,13 +5,16 @@
  * Github : https://github.com/stevewooo
  */
 let Cnf = require(`${__dirname}/../../Cnf.js`);
+const path = require('path');
 
 /**
  * 入口处实例化CNF，保留全局变量global.CNF
  */
 async function main(){
     let cnf = new Cnf();
-    await cnf.build();
+    await cnf.build({
+        config : require(`${path.resolve(cnf.argv.config)}`)
+    });
     /**
      * 注册网络消息事件回调，netCallback函数为业务主要函数的入口
      */
@@ -33,8 +36,9 @@ async function main(){
      */
     setInterval(async function(){
         await cnf.net.msg.brocast(JSON.stringify({
-            hello : 'world'
+            hello : 'world',
+            name : global.CNF.CONFIG.net.discoverUdpPort
         }))
-    }, 4000)
+    }, 10000)
 }
 main()

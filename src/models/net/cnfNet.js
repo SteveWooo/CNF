@@ -52,6 +52,32 @@ let receiveTcpMsgModel = {
 
             await model.connection.tcpShakeBack(socket);
         },
+        /**
+         * 邻居分享事件
+         */
+        neighborEvent : async function(socket, data, fromType){
+            let neighbors = data.neighbor;
+            for(var i=0;i<neighbors.length;i++) {
+                let node = new model.Node({
+                    nodeId : neighbors[i].nodeId,
+                    ip : neighbors[i].ip,
+                    tcpport : neighbors[i].tcpport,
+                    udpport : neighbors[i].udpport
+                })
+                // 已经连接过的不要重复连接
+                if (await model.bucket.isNodeAlreadyInBucket(node)) {
+                    // console.log('already in bucket!!!')
+                    continue ;
+                }
+                // 也不要连接自己
+                if (node.nodeId == global.CNF.netData.nodeId || 
+                        (node.tcpport == global.CNF.CONFIG.net.connectionTcpServerPort && node.udpport == global.CNF.CONFIG.net.discoverUdpPort)) {
+                    // console.log("这是自己")
+                    continue ;
+                }
+                await model.discover.addNodeToNeighbor(node);
+            }
+        },
         bussEvent : async function(socket, data, fromType) {
             // console.log('get buss')
             // 先检查在不在inBound和outBound桶里, 不在的话, 就丢掉. 只有合法的节点才能发buss消息
@@ -224,6 +250,7 @@ let findNodeModel = {
         }
 
         findNodeModel.isFinding = false;
+        return ;
     },
     findNodeJob : async function(){
         setInterval(async function(){
@@ -232,6 +259,55 @@ let findNodeModel = {
                 return ;
             }
             await findNodeModel.doFindNode();
+        }, 1000);
+        return ;
+    },
+    doShareNeighbor : async function(){
+        const MAX_NEIGHBOR = 20;
+        let neighbors = [];
+        // 找邻居，混着tried和new去发
+        let triedBk = [];
+        let newBk = [];
+        for(var i=0;i<global.CNF.netData.buckets.tried.length;i++) {
+            for(var k=0;k<global.CNF.netData.buckets.tried[i].length;k++) {
+                if(global.CNF.netData.buckets.tried[i][k] == undefined) {
+                    continue;
+                }
+                triedBk.push(global.CNF.netData.buckets.tried[i][k]);
+            }
+        }
+        for(var i=0;i<global.CNF.netData.buckets.new.length;i++) {
+            for(var k=0;k<global.CNF.netData.buckets.new[i].length;k++) {
+                if(global.CNF.netData.buckets.new[i][k] == undefined) {
+                    continue;
+                }
+                newBk.push(global.CNF.netData.buckets.new[i][k]);
+            }
+        }
+        let allBk = triedBk.concat(newBk);
+        while(allBk.length > 0) {
+            let index = Math.floor(Math.random() * allBk.length);
+            let node = allBk[index];
+            allBk.splice(index, 1);
+            neighbors.push(node);
+            if (neighbors.length >= MAX_NEIGHBOR) {
+                break;
+            }
+        }
+
+        // 发送给邻居
+        await global.CNF.net.msg.neighbor({
+            neighbor : neighbors
+        })
+
+        return ;
+    },
+    /**
+     * 在寻找桶里节点进行连接的同时，还需要把自己的两个桶的节点分享给已连接的节点。
+     */
+    shareNeighborJob : async function(){
+        setInterval(async function(){
+            await findNodeModel.doShareNeighbor();
         }, 1000);
         return ;
     }
@@ -254,9 +330,11 @@ let nodeDiscoverModel = {
             return ;
         }
         if(await model.bucket.isNodeAlreadyInBucket(node)) {
+            await model.discover.deleteNeighbor(node);
             return ;
         }
         if(await model.connection.isNodeAlreadyConnected(node)) {
+            await model.discover.deleteNeighbor(node);
             return ;
         }
         // console.log('shake:');
@@ -287,6 +365,7 @@ let nodeDiscoverModel = {
         }
         try{
             message = JSON.parse(message);
+            // console.log(message);
             message.msg = JSON.parse(message.msg);
         }catch(e) {
             throw Error(6001, 'cnfNet.js nodeDiscovermodel.onMessage');
@@ -412,6 +491,15 @@ let handle = function(){
                 }
                 data = JSON.stringify(data);
                 socket.write(data);
+            },
+
+            neighbor : async function(msg) {
+                let data = {
+                    event : 'neighborEvent',
+                    neighbor : msg.neighbor
+                }
+                data = JSON.stringify(data);
+                await model.connection.brocast(data);
             }
         },
         node : {
@@ -425,6 +513,8 @@ let handle = function(){
                 await nodeDiscoverModel.startDetect();
                 // 从bucket中找人连接
                 await findNodeModel.findNodeJob();
+                // 同时把自己的桶分享给邻居
+                await findNodeModel.shareNeighborJob();
                 print.info(`Node started ! `);
                 return ;
             }

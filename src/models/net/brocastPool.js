@@ -49,3 +49,11 @@ function pushCache (socket, data, fromType) {
     return ;
 }
 exports.pushCache = pushCache
+
+/**
+ * 定期清理广播缓存池子，避免爆内存
+ */
+function cleanCache(){
+
+}
+exports.cleanCache = cleanCache;

@@ -1,0 +1,1 @@
+node example/mulNodes/startup.js -config example/mulNodes/config3.json -datadir example/mulNodes/data3
