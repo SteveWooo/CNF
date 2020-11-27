@@ -48,6 +48,7 @@ let receiveTcpMsgModel = {
             // 把节点从tempConnection放到inBound
             if(fromType == 'inBoundNodeMsg') {
                 await model.connection.finishTcpShake(socket, node, fromType);
+                await model.bucket.addNewNodeToTried(node);
             }
 
             await model.connection.tcpShakeBack(socket);
@@ -64,7 +65,7 @@ let receiveTcpMsgModel = {
                     tcpport : neighbors[i].tcpport,
                     udpport : neighbors[i].udpport
                 })
-                // 已经连接过的不要重复连接
+                // 已经在路由中的不要重复添加
                 if (await model.bucket.isNodeAlreadyInBucket(node)) {
                     // console.log('already in bucket!!!')
                     continue ;

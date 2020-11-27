@@ -20,9 +20,14 @@ async function main(){
      */
     await cnf.net.msg.registerMsgEvent({
         netCallback : async function(data){
-            console.log(`receive data : `);
-            console.log(data.msg);
+            // console.log(`receive data : `);
+            // console.log(data.msg);
             // await cnf.net.msg.send(data.socket, 'receive');
+
+            console.log("new");
+            console.log(global.CNF.netData.buckets.new[0])
+            console.log("tried");
+            console.log(global.CNF.netData.buckets.tried[0])
         }
     })
 

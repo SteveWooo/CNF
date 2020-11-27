@@ -21,6 +21,14 @@ module.exports = function() {
     cnf.argv = argv.getArgv();
 
     /**
+     * 集成常用工具库，需要根据具体项目实施
+     */
+    cnf.utils = {
+        print : require(`${__dirname}/../utils/print`),
+        sign : require(`${__dirname}/utils/sign`),
+    }
+
+    /**
      * 在构建函数中统一调用初始化函数。目的是构建global.CNF中的对象数据结构
      */
     cnf.build = async function(param){
@@ -91,14 +99,6 @@ module.exports = function() {
          */
         let cnfNet = require(`${__dirname}/net/cnfNet`);
         global.CNF.net = cnfNet.handle();
-        
-        /**
-         * 集成常用工具库，需要根据具体项目实施
-         */
-        global.CNF.utils = {
-            print : require(`${__dirname}/../utils/print`),
-            sign : require(`${__dirname}/utils/sign`),
-        }
 
         /**
          * 一些数据库的内部函数入口

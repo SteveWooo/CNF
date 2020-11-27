@@ -110,6 +110,51 @@ let addTryingNodeToTried = async function(node){
     // todo
     global.CNF.netData.buckets.tried[0].push(tryNode);
 }
+
+/**
+ * 把new桶里的Node添加到tried桶里. 这发生在TCPshake之后.
+ * 其实我怀疑这个操作的必要性.
+ */
+let addNewNodeToTried = async function(node){
+    let newNode = undefined;
+    for(var i=0;i<global.CNF.netData.buckets.new.length;i++) {
+        for(var k=0;k<global.CNF.netData.buckets.new[i].length;k++) {
+            if(node.nodeId == global.CNF.netData.buckets.new[i][k].nodeId) {
+                newNode = global.CNF.netData.buckets.new[i].splice(k, 1)[0];
+                break;
+            }
+        }
+    }
+
+    // 在新桶里找不到, 就去找找其他桶
+    if(newNode == undefined) {
+        for(var i=0;i<global.CNF.netData.buckets.trying.length;i++) {
+            if(node.nodeId == global.CNF.netData.buckets.trying[i].nodeId) {
+                newNode = global.CNF.netData.buckets.trying.splice(i, 1)[0];
+                break;
+            }
+        }
+    }
+    if(newNode == undefined) {
+        for(var i=0;i<global.CNF.netData.buckets.tried.length;i++) {
+            for(var k=0;k<global.CNF.netData.buckets.tried[i].length;k++) {
+                if(node.nodeId == global.CNF.netData.buckets.tried[i][k].nodeId) {
+                    newNode = global.CNF.netData.buckets.tried[i].splice(k, 1)[0];
+                    break;
+                }
+            }
+        }
+    }
+
+    if(newNode == undefined) {
+        print.error("New桶中找不到该node, 但也已经加入tried中.")
+        newNode = node;
+    }
+
+    // todo
+    global.CNF.netData.buckets.tried[0].push(newNode);
+}
+
 let addNodeToNew = async function(node){
     let flag = false;
     for(var i=0;i<global.CNF.netData.buckets.new.length;i++) {
@@ -127,6 +172,7 @@ let addNodeToNew = async function(node){
 }
 model.addNodeToNew = addNodeToNew;
 model.addTryingNodeToTried = addTryingNodeToTried;
+model.addNewNodeToTried = addNewNodeToTried;
 // model.addNodeToTried = addNodeToTried;
 
 /**
