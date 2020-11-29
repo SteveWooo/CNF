@@ -39,16 +39,21 @@ let build = async function(param){
         doingShake : {},
         neighbor : [],
     };
-
+    // return ;
     globalDiscover.udpSocket = dgram.createSocket('udp4');
-    
+
     // 注册回调
     for(var i in param.callbackFunc) {
         globalDiscover.udpSocket.on(i, param.callbackFunc[i]);
     }
 
     // 绑定端口，这里会触发listening回调
-    globalDiscover.udpSocket.bind(global.CNF.CONFIG.net.discoverUdpPort);
+    // console.log(`processID: ${process.env.CONFIG_INDEX}`, global.CNF.CONFIG.net.discoverUdpPort);
+    globalDiscover.udpSocket.bind({
+        address : global.CNF.CONFIG.net.localhost,
+        port : global.CNF.CONFIG.net.discoverUdpPort,
+        exclusive : true, // 为了在Cluster模块下使用，不然默认是不允许一个进程绑定多个UDP端口的
+    });
 
     global.CNF.netData.discover = globalDiscover;
 
@@ -81,6 +86,7 @@ let doShake = async function(node, type) {
     // print.info(`doing: ${type}`);
     // 拦一栏
     if(type != CONFIG.PING_TYPE && type != CONFIG.PONG_TYPE) {
+        print.error(`discover.js doShake: node shake type`)
         return ;
     }
     let shakeData = new Shake(node, type);
@@ -207,8 +213,23 @@ model.isNodeAlreadyInNeighbor = isNodeAlreadyInNeighbor;
  * 如果邻居列表为空，就找种子列表。
  */
 let getNeighbor = async function() {
-    let index = Math.floor(Math.random() * global.CNF.netData.discover.neighbor.length)
-    let node = global.CNF.netData.discover.neighbor[index];
+    let node = undefined;
+    // 如果neighbor为空，就给一个随机seed进邻居里
+    if (global.CNF.netData.discover.neighbor.length == 0) {
+        let index = Math.floor(Math.random() * global.CNF.CONFIG.net.seed.length);
+        let seedNode = new Node({
+            nodeId : global.CNF.CONFIG.net.seed[index].nodeId,
+            ip : global.CNF.CONFIG.net.seed[index].ip,
+            udpport : global.CNF.CONFIG.net.seed[index].udpport,
+            tcpport : global.CNF.CONFIG.net.seed[index].tcpport
+        })
+        await addNodeToNeighbor(seedNode);
+        
+    } else {
+        let index = Math.floor(Math.random() * global.CNF.netData.discover.neighbor.length)
+        node = global.CNF.netData.discover.neighbor[index];
+    }
+
     return node;
 }
 model.getNeighbor = getNeighbor;

@@ -13,7 +13,7 @@ const TcpShakeBack = require(`${__dirname}/TcpShakeBack.js`);
 let model = {};
 const CONFIG = {
     MAX_INBOUND : 117,
-    MAX_OUTBOUND : 8,
+    MAX_OUTBOUND : 40,
     MAX_TEMP : 1024,
     HOST : '127.0.0.1',
     MSG_POOL_LENGTH : 1024
@@ -58,17 +58,18 @@ function doConnect (node, callbackFunc) {
             socket.on('data', async function(data){
                 await callbackFunc.onMessage(data, socket);
             });
-            print.info('out bound connected: ' + node.nodeId);
+            // print.info('out bound connected: ' + node.nodeId);
             isConn = true;
             resolve(socket);
         });
         socket.on('error', async function(e){
             if(!isConn) {
-                // console.log('on connecting error');
+                print.error('on connecting error');
                 resolve();
                 return ;
             }
-            // console.log('conn lost');
+            print.error('conn lost');
+            // console.log(e);
             await callbackFunc.onError(e, socket);
         })
     })
@@ -242,8 +243,21 @@ let deleteSocket = async function(socket) {
         }
     }
 
+    for(var i=0;i<global.CNF.netData.connections.temp.length;i++) {
+        if(socket == global.CNF.netData.connections.temp[i].socket) {
+            let conn = global.CNF.netData.connections.temp.splice(i, 1)[0];
+            return conn.node;
+        }
+    }
+
 }
 model.deleteSocket = deleteSocket;
+
+let doSocketDestroy = async function(socket) {
+    await deleteSocket(socket);
+    socket.destroy();
+}
+model.doSocketDestroy = doSocketDestroy;
 
 /**
  * 握手完成的操作:
@@ -266,18 +280,20 @@ let finishTcpShake = async function(socket, node, fromType) {
 
     /**
      * 如果这个nodeId已经在inBound outBound, 或者outBoundTrying里面了, 就断掉8
-     * 这是一个锁
+     * 断掉也要通知对方，对方需要把这个socket从connections里面删除
      */
     for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
         if(global.CNF.netData.connections.inBound[i].node.nodeId == node.nodeId) {
-            socket.destroy();
-            return ;
+            return {
+                status : "alreadyConnected"
+            };
         }
     }
     for(var i=0;i<global.CNF.netData.connections.outBound.length;i++) {
         if(global.CNF.netData.connections.outBound[i].node.nodeId == node.nodeId) {
-            socket.destroy();
-            return ;
+            return {
+                status : "alreadyConnected"
+            };
         }
     }
 
@@ -288,7 +304,9 @@ let finishTcpShake = async function(socket, node, fromType) {
     if(fromType == 'outBoundNodeMsg') {
         await pushOutBoundConnection(socket, node);
     }
-    
+    return {
+        status : "ok"
+    }
 }
 model.finishTcpShake = finishTcpShake;
 

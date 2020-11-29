@@ -36,19 +36,53 @@ let receiveTcpMsgModel = {
             let node = new model.Node(data.msg.from);
             // 只把主动连接的节点放tried, 被动链接的不放
             if(fromType == 'outBoundNodeMsg') {
-                await model.connection.finishTcpShake(socket, node, fromType);
+                let result = await model.connection.finishTcpShake(socket, node, fromType);
+                if (result.status == 'alreadyConnected') {
+                    await global.CNF.net.msg.socketDestroy(socket);
+                    await model.connection.doSocketDestroy(socket);
+                    return ;
+                }
+
                 await model.bucket.addTryingNodeToTried(node);
+            } else {
+                print.error("非OutBoudNode发送了TCP shakeEvent")
             }
         },
-        // 别人连接完我之后, 第一时间就是给我发shake. 那么我这个时候就需要把这个socket放到inBound里面了.
+        /**
+         * 别人连接完我之后, 第一时间就是给我发shake. 那么我这个时候就需要把这个socket放到inBound里面了.
+         * # 必须先检查我的桶里是否有对方，如果没有，这个连接必须断掉。
+         */
         shakeEvent : async function(socket, data, fromType){
             // console.log('get shake');
             data.msg = JSON.parse(data.msg);
             let node = new model.Node(data.msg.from);
+            
             // 把节点从tempConnection放到inBound
             if(fromType == 'inBoundNodeMsg') {
-                await model.connection.finishTcpShake(socket, node, fromType);
+                // # 检查我的桶里是否有对方，没有的话果断断掉。
+                if (!(await model.bucket.isNodeAlreadyInBucket(node))) {
+                    print.warn("node not in bucket");
+                    await global.CNF.net.msg.socketDestroy(socket);
+                    // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
+                    await model.bucket.deleteTryingNode(node);
+                    await model.connection.doSocketDestroy(socket);
+                    return ;
+                }
+
+                let result = await model.connection.finishTcpShake(socket, node, fromType);
+                // 如果是双方同时连接，那么晚到的一位兄弟，就要主动断掉自己发起的连接，并通知对方也断掉这个socket。
+                if (result.status == 'alreadyConnected') {
+                    print.info("node already connected");
+                    await global.CNF.net.msg.socketDestroy(socket);
+                    // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
+                    await model.bucket.deleteTryingNode(node);
+                    await model.connection.doSocketDestroy(socket);
+                    return ;
+                }
+
                 await model.bucket.addNewNodeToTried(node);
+            } else {
+                print.error("非InBoudNode发送了TCP shakeEvent")
             }
 
             await model.connection.tcpShakeBack(socket);
@@ -67,7 +101,6 @@ let receiveTcpMsgModel = {
                 })
                 // 已经在路由中的不要重复添加
                 if (await model.bucket.isNodeAlreadyInBucket(node)) {
-                    // console.log('already in bucket!!!')
                     continue ;
                 }
                 // 也不要连接自己
@@ -78,6 +111,16 @@ let receiveTcpMsgModel = {
                 }
                 await model.discover.addNodeToNeighbor(node);
             }
+        },
+        socketDestroyEvent : async function(socket, data, fromType){
+            let nodeInfo = data.from.nodeInfo;
+            // 从socket中删除
+            await model.connection.doSocketDestroy(socket);
+
+            // 从bucket.trying中删除
+            await model.bucket.deleteTryingNode(nodeInfo);
+
+            // 由于是收到对方的摧毁请求，说明对方的new桶里没有我，而我有对方。这样不合理，所以要把这个节点从自己的new桶里也删除掉
         },
         bussEvent : async function(socket, data, fromType) {
             // console.log('get buss')
@@ -158,11 +201,11 @@ let nodeServerModel = {
     isConnecting : false,
     // 被连接的时候，就会触发这个函数，参数socket是别人的socket，需要放到inBound里面
     onConnect : async function(socket){
-        if(nodeServerModel.isConnecting === true) {
-            return ;
-        }
+        // if(nodeServerModel.isConnecting === true) {
+        //     return ;
+        // }
         nodeServerModel.isConnecting = true;
-        print.info(`Was connected by ${socket.remoteAddress}:${socket.remotePort}`);
+        // print.info(`Was connected by ${socket.remoteAddress}:${socket.remotePort}`);
 
         // 有人来连接,就扔进temp先
         await model.connection.pushTempConnection(socket);
@@ -172,6 +215,7 @@ let nodeServerModel = {
             return ;
         })
         socket.on('error', async function(e) {
+            console.log(e)
             let node = await model.connection.deleteSocket(socket);
             print.info(`${node != undefined ? node.nodeId : 'unknow'} has disconneced.`);
         })
@@ -204,6 +248,7 @@ let findNodeModel = {
     },
 
     onError : async function(e, socket) {
+        console.log(e)
         let node = await model.connection.deleteSocket(socket);
         print.info(`${node != undefined ? node.nodeId : 'unknow'} has disconneced.`);
     },
@@ -213,6 +258,7 @@ let findNodeModel = {
      * 1、随机从桶里要个节点出来
      * 2、连接完成。（成功或者失败都算连接完成）
      * v
+     * 对于被连接的：A节点的桶里有B，但是B的桶里没有A，这个时候A主动连接B，B应该断开。#必须双方桶里都有对方，连接才能建立
      */
     doFindNode : async function(){
         findNodeModel.isFinding = true;
@@ -235,6 +281,12 @@ let findNodeModel = {
             return ;
         }
 
+        // 不要连接自己
+        if(node.nodeId == global.CNF.CONFIG.net.publicKey) {
+            findNodeModel.isFinding = false;
+            return ;
+        }
+
         // 尝试连接这个幸运儿节点,然后加入全局
         let socket = await model.connection.tryOutBoundConnect(node, {
             onMessage : findNodeModel.onMessage,
@@ -248,6 +300,8 @@ let findNodeModel = {
             await model.bucket.tryConnectNode(node);
             // 然后马上给对方发tcpshake包,表明自己的nodeId
             await model.connection.tcpShake(socket);
+        } else {
+            print.error(`cnfNet.js findNodeModel.doFineNode: socket创建失败`)
         }
 
         findNodeModel.isFinding = false;
@@ -260,7 +314,7 @@ let findNodeModel = {
                 return ;
             }
             await findNodeModel.doFindNode();
-        }, 1000);
+        }, 500);
         return ;
     },
     doShareNeighbor : async function(){
@@ -286,6 +340,8 @@ let findNodeModel = {
             }
         }
         let allBk = triedBk.concat(newBk);
+
+        // 随机找MAX_NEIGHBOR个邻居进行分享
         while(allBk.length > 0) {
             let index = Math.floor(Math.random() * allBk.length);
             let node = allBk[index];
@@ -331,15 +387,18 @@ let nodeDiscoverModel = {
             return ;
         }
         if(await model.bucket.isNodeAlreadyInBucket(node)) {
+            // console.log(`nodeAlreadyInBucket`)
             await model.discover.deleteNeighbor(node);
             return ;
         }
         if(await model.connection.isNodeAlreadyConnected(node)) {
+            // console.log(`nodeAlreadyConnect`)
             await model.discover.deleteNeighbor(node);
             return ;
         }
         // console.log('shake:');
         // console.log(node);
+        // console.log(`doing shake`)
         await model.discover.doShake(node, model.discover.CONFIG.PING_TYPE);
         return ;
     },
@@ -353,7 +412,7 @@ let nodeDiscoverModel = {
             nodeDiscoverModel.isDetecting = true;
             await nodeDiscoverModel.detect();
             nodeDiscoverModel.isDetecting = false;
-        }, 1100);
+        }, 500);
         return ;
     },
 
@@ -379,7 +438,7 @@ let nodeDiscoverModel = {
             let result = await model.discover.receiveNodePing(message, remote);
             // 直接回pong的
             if(result.doShakeType == model.discover.CONFIG.PONG_TYPE) {
-                await model.discover.doShake(result.node, result.doShakeType);
+                await model.discover.doShake(result.node, model.discover.CONFIG.PONG_TYPE);
             }
 
             // 回完PONG后回PING的。做这个pingpong应答的目的是给那些自己找上门的节点一个建交机会。
@@ -412,7 +471,7 @@ let nodeDiscoverModel = {
 
     // todo 踢掉断开连接的socket
     onError : async function(e) {
-        // console.log(e);
+        console.log(e);
         return ;
     },
 
@@ -425,6 +484,17 @@ let nodeDiscoverModel = {
                 error : nodeDiscoverModel.onError,
             }
         });
+
+        // 定时任务，主要用于清理过期缓存，垃圾回收
+        setInterval(async function(){
+            let now = +new Date();
+            for(var shakeJob in global.CNF.netData.discover.doingShake) {
+                // 过期的握手缓存需要删除掉
+                if (now - global.CNF.netData.discover.doingShake[shakeJob].ts >= 5000) {
+                    delete global.CNF.netData.discover.doingShake[shakeJob];
+                }
+            }
+        }, 5000);
         return ;
     }
 }
@@ -501,6 +571,21 @@ let handle = function(){
                 }
                 data = JSON.stringify(data);
                 await model.connection.brocast(data);
+            },
+
+            socketDestroy : async function(socket, msg) {
+                let now = +new Date();
+                let data = {
+                    event : 'socketDestroyEvent',
+                    from : {
+                        nodeInfo : {
+                            nodeId : global.CNF.netData.nodeId
+                        },
+                        createAt : now
+                    }
+                }
+                data = JSON.stringify(data);
+                socket.write(data);
             }
         },
         node : {
@@ -552,21 +637,6 @@ let build = async function(){
     // 主要是tcp那边的连接
     await nodeServerModel.build();
 
-    // 先加几个憨憨节点进去测试
-    // let node1 = new model.Node({
-    //     nodeId : 'hahahaha1',
-    //     ip : '127.0.0.1',
-    //     tcpport : 30303,
-    //     udpport : 30303
-    // })
-    // let node2 = new model.Node({
-    //     nodeId : 'hahahaha2',
-    //     ip : '127.0.0.1',
-    //     tcpport : 30304,
-    //     udpport : 30304
-    // })
-    // await model.bucket.addNodeToNew(node1);
-    // await model.bucket.addNodeToTried(node2);
 }
 model.build = build;
 

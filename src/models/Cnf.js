@@ -47,7 +47,7 @@ module.exports = function() {
         if (global.CNF.argv['datadir'] != undefined) {
             global.CNF.CONFIG.DATA_DIR = `${path.resolve()}/${global.CNF.argv['datadir']}`
         } else {
-            global.CNF.CONFIG.DATA_DIR = `${path.resolve()}/dataDir`
+            global.CNF.CONFIG.DATA_DIR = global.CNF.CONFIG.datadir
         }
 
         /**

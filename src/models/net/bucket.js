@@ -5,6 +5,7 @@
  * Github : https://github.com/stevewooo
  */
 const Error = require(`${__dirname}/../../utils/Error`);
+const print = require(`${__dirname}/../../utils/print`);
 let model = {};
 const CONFIG = {
     TRIED_BUCKET_TOTAL : 16,
@@ -104,10 +105,29 @@ let addTryingNodeToTried = async function(node){
         }
     }
     if(tryNode == undefined) {
-        throw new Error(5000, 'bucket.js add trying Node To Tried');
+        print.error('trying bucket中找不到该节点，所以丢弃了');
+        return ;
+        // throw new Error(5000, 'bucket.js add trying Node To Tried');
     }
 
-    // todo
+    if (process.env.CONFIG_INDEX == 0) {
+        if (tryNode.nodeId == global.CNF.CONFIG.net.nodeId) {
+            print.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!把自己加到tried桶里了")
+        }
+    }
+
+    // 不要重复加入tried里面已经有的节点。
+    let tempNode = undefined;
+    for(var i=0;i<global.CNF.netData.buckets.trying.length;i++) {
+        if(node.nodeId == global.CNF.netData.buckets.trying[i].nodeId) {
+            tempNode = global.CNF.netData.buckets.trying.splice(i, 1)[0];
+            break;
+        }
+    }
+    if (tempNode != undefined) {
+        return ;
+    }
+    
     global.CNF.netData.buckets.tried[0].push(tryNode);
 }
 
@@ -167,9 +187,48 @@ let addNodeToNew = async function(node){
     if(flag == true) {
         return ;
     }
-    // todo
+    // 不要把自己加入自己的new里
+    if (node.nodeId == global.CNF.CONFIG.net.publicKey) {
+        return ;
+    }
+
     global.CNF.netData.buckets.new[0].push(node);
 }
+
+let deleteTryingNode = async function(node) {
+    let temp = undefined;
+    for(var i=0;i<global.CNF.netData.buckets.trying.length;i++) {
+        if(node.nodeId == global.CNF.netData.buckets.trying[i].nodeId) {
+            temp = global.CNF.netData.buckets.trying.splice(i, 1)[0];
+            break;
+        }
+    }
+    if(temp != undefined) {
+        print.info("delete trying node successful")
+    }
+    return temp;
+}
+
+// let deleteNewNode = async function(node) {
+//     let temp = undefined;
+//     for(var i=0;i<global.CNF.netData.buckets.new.length;i++) {
+//         for(var k=0;k<global.CNF.netData.buckets.new[i].length;k++) {
+//             if(node.nodeId == global.CNF.netData.buckets.new[i][k].nodeId) {
+//                 temp = global.CNF.netData.buckets.new[i].splice(k, 1)[0];
+//                 break;
+//             }
+//         }
+//     }
+//     if(temp != undefined) {
+//         print.info("delete new node successful")
+//     } else {
+//         print.error("delete new node faile")
+//     }
+//     return temp;
+// }
+
+// model.deleteNewNode = deleteNewNode;
+model.deleteTryingNode = deleteTryingNode;
 model.addNodeToNew = addNodeToNew;
 model.addTryingNodeToTried = addTryingNodeToTried;
 model.addNewNodeToTried = addNewNodeToTried;
