@@ -97,6 +97,18 @@ let doShake = async function(node, type) {
 }
 model.doShake = doShake;
 
+let deleteDoingShake = async function(node) {
+    if (!(node.nodeId in global.CNF.netData.discover.doingShake)) {
+        print.warn("删除doingShake失败");
+        return ;
+    }
+
+    delete global.CNF.netData.discover.doingShake[node.nodeId];
+    print.info("删除doingShake成功");
+    return ;
+}
+model.deleteDoingShake = deleteDoingShake;
+
 /**
  * 收到握手请求。TODO，自己发给自己的数据包就别处理了
  * @param shakePack 数据包
@@ -107,13 +119,17 @@ model.doShake = doShake;
 let receiveNodePing = async function(message, remote) {
     // console.log('receive ping')
     let nodeId = sign.recover(message.signature, message.recid, JSON.stringify(message.msg));
+
+    // 纯根据信息内容来（容易被放大攻击
     // let ip = message.msg.from.ip;
-    let ip = remote.address;
-    // 双端口统一，这样打洞的时候方便
     // let udpport = message.msg.from.udpport;
     // let tcpport = message.msg.from.tcpport;
+
+    // 纯根据来源判断
+    let ip = remote.address;
     let udpport = remote.port;
     let tcpport = remote.port;
+
     let node = new Node({
         nodeId : nodeId,
         ip : ip,
@@ -148,11 +164,14 @@ model.receiveNodePing = receiveNodePing;
 let receiveNodePong = async function(message, remote) {
     // console.log('receive pong');
     let nodeId = sign.recover(message.signature, message.recid, JSON.stringify(message.msg));
+
+    // 纯根据信息内容来（容易被放大攻击
     // let ip = message.msg.from.ip;
-    let ip = remote.address;
-    // 双端口统一，这样打洞的时候方便
     // let udpport = message.msg.from.udpport;
     // let tcpport = message.msg.from.tcpport;
+
+    // 纯根据来源判断
+    let ip = remote.address;
     let udpport = remote.port;
     let tcpport = remote.port;
 

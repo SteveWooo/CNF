@@ -43,11 +43,32 @@ module.exports = function() {
         // TODO：需要做到只选用有用的配置项目，无用项目不需要载入，必要项目若空则报错退出。
         global.CNF.CONFIG = param.config
         
-        // 直接用当前目录
+        // 数据存盘目录需要写入配置，或做默认项
         if (global.CNF.argv['datadir'] != undefined) {
             global.CNF.CONFIG.DATA_DIR = `${path.resolve()}/${global.CNF.argv['datadir']}`
         } else {
             global.CNF.CONFIG.DATA_DIR = global.CNF.CONFIG.datadir
+        }
+
+        // 通过配置选择是否分享邻居和接受邻居分享（默认是主动分享且接收
+        if (param.config.net.neighborReceive == true || param.config.net.neighborReceive == false) {
+            global.CNF.CONFIG.net.neighborReceive = param.config.net.neighborReceive;
+        } else {
+            global.CNF.CONFIG.net.neighborReceive = true;
+        }
+
+        if (param.config.net.neighborShare == true || param.config.net.neighborShare == false) {
+            global.CNF.CONFIG.net.neighborShare = param.config.net.neighborShare;
+        } else {
+            global.CNF.CONFIG.net.neighborShare = true;
+        }
+
+        // 连接量的配置
+        if (param.config.net.MAX_INBOUND != undefined && parseInt(param.config.net.MAX_INBOUND) == param.config.net.MAX_INBOUND) {
+            global.CNF.CONFIG.net.MAX_INBOUND = param.config.net.MAX_INBOUND;
+        }
+        if (param.config.net.MAX_OUTBOUND != undefined && parseInt(param.config.net.MAX_OUTBOUND) == param.config.net.MAX_OUTBOUND) {
+            global.CNF.CONFIG.net.MAX_OUTBOUND = param.config.net.MAX_OUTBOUND;
         }
 
         /**

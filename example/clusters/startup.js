@@ -110,23 +110,23 @@ async function startup(){
         //     console.log(`doing shake :`, global.CNF.netData.discover.doingShake);
         // }
         
-        // if (process.env.CONFIG_INDEX == 0) {
-        //     console.log("=====================process0=========");
-        //     console.log("tried bucket length:", global.CNF.netData.buckets.tried[0].length)
-        //     console.log("new bucket length:", global.CNF.netData.buckets.new[0].length)
-        //     console.log("trying bucket length:", global.CNF.netData.buckets.trying.length)
-        //     console.log(`neighbor bucket length:`, global.CNF.netData.discover.neighbor.length)
-        //     // console.log(global.CNF.netData.buckets.new[0])
-        //     console.log(`inbound connect length :`, global.CNF.netData.connections.inBound.length)
-        //     console.log(`outbound connect length:`, global.CNF.netData.connections.outBound.length)
-        //     console.log(`temp connect length:`, global.CNF.netData.connections.temp.length)
-        //     console.log(`doing shake :`, global.CNF.netData.discover.doingShake);
-        //     // for(var i=0;i<global.CNF.netData.buckets.tried[0].length;i++) {
-        //     //     console.log(global.CNF.netData.buckets.tried[0][i].nodeId);
-        //     // }
-        // }
+        if (process.env.CONFIG_INDEX == 0) {
+            console.log("=====================process0=========");
+            console.log("tried bucket length:", global.CNF.netData.buckets.tried[0].length)
+            console.log("new bucket length:", global.CNF.netData.buckets.new[0].length)
+            console.log("trying bucket length:", global.CNF.netData.buckets.trying.length)
+            console.log(`neighbor bucket length:`, global.CNF.netData.discover.neighbor.length)
+            // console.log(global.CNF.netData.buckets.new[0])
+            console.log(`inbound connect length :`, global.CNF.netData.connections.inBound.length)
+            console.log(`outbound connect length:`, global.CNF.netData.connections.outBound.length)
+            console.log(`temp connect length:`, global.CNF.netData.connections.temp.length)
+            console.log(`doing shake :`, global.CNF.netData.discover.doingShake);
+            // for(var i=0;i<global.CNF.netData.buckets.tried[0].length;i++) {
+            //     console.log(global.CNF.netData.buckets.tried[0][i].nodeId);
+            // }
+        }
 
-        console.log(`processID: ${process.env.CONFIG_INDEX}`, global.CNF.netData.buckets.tried[0].length);
+        // console.log(`processID: ${process.env.CONFIG_INDEX}`, global.CNF.netData.buckets.tried[0].length);
     }, 500);
 }
 

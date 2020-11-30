@@ -34,12 +34,13 @@ let receiveTcpMsgModel = {
             // console.log('get shake back');
             data.msg = JSON.parse(data.msg);
             let node = new model.Node(data.msg.from);
+
             // 只把主动连接的节点放tried, 被动链接的不放
             if(fromType == 'outBoundNodeMsg') {
                 let result = await model.connection.finishTcpShake(socket, node, fromType);
-                if (result.status == 'alreadyConnected') {
-                    await global.CNF.net.msg.socketDestroy(socket);
-                    await model.connection.doSocketDestroy(socket);
+                if (result.status == 'alreadyConnected' || result.status == "full") {
+                    await global.CNF.net.msg.socketDestroy(socket, node);
+                    // await model.connection.doSocketDestroy(socket);
                     return ;
                 }
 
@@ -62,21 +63,21 @@ let receiveTcpMsgModel = {
                 // # 检查我的桶里是否有对方，没有的话果断断掉。
                 if (!(await model.bucket.isNodeAlreadyInBucket(node))) {
                     print.warn("node not in bucket");
-                    await global.CNF.net.msg.socketDestroy(socket);
-                    // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
-                    await model.bucket.deleteTryingNode(node);
-                    await model.connection.doSocketDestroy(socket);
+                    await global.CNF.net.msg.socketDestroy(socket, node);
+                    // // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
+                    // await model.bucket.deleteTryingNode(node);
+                    // await model.connection.doSocketDestroy(socket);
                     return ;
                 }
 
                 let result = await model.connection.finishTcpShake(socket, node, fromType);
                 // 如果是双方同时连接，那么晚到的一位兄弟，就要主动断掉自己发起的连接，并通知对方也断掉这个socket。
-                if (result.status == 'alreadyConnected') {
+                if (result.status == 'alreadyConnected'  || result.status == "full") {
                     print.info("node already connected");
-                    await global.CNF.net.msg.socketDestroy(socket);
-                    // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
-                    await model.bucket.deleteTryingNode(node);
-                    await model.connection.doSocketDestroy(socket);
+                    await global.CNF.net.msg.socketDestroy(socket, node);
+                    // // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
+                    // await model.bucket.deleteTryingNode(node);
+                    // await model.connection.doSocketDestroy(socket);
                     return ;
                 }
 
@@ -91,6 +92,9 @@ let receiveTcpMsgModel = {
          * 邻居分享事件
          */
         neighborEvent : async function(socket, data, fromType){
+            if (global.CNF.CONFIG.net.neighborReceive != true) {
+                return ;
+            }
             let neighbors = data.neighbor;
             for(var i=0;i<neighbors.length;i++) {
                 let node = new model.Node({
@@ -114,13 +118,17 @@ let receiveTcpMsgModel = {
         },
         socketDestroyEvent : async function(socket, data, fromType){
             let nodeInfo = data.from.nodeInfo;
+            if (nodeInfo.nodeId == undefined) {
+                return ;
+            }
             // 从socket中删除
             await model.connection.doSocketDestroy(socket);
 
             // 从bucket.trying中删除
             await model.bucket.deleteTryingNode(nodeInfo);
 
-            // 由于是收到对方的摧毁请求，说明对方的new桶里没有我，而我有对方。这样不合理，所以要把这个节点从自己的new桶里也删除掉
+            // 防止是udp握手的异常，把doingShake也删除掉
+            // await model.discover.deleteDoingShake(nodeInfo);
         },
         bussEvent : async function(socket, data, fromType) {
             // console.log('get buss')
@@ -301,7 +309,7 @@ let findNodeModel = {
             // 然后马上给对方发tcpshake包,表明自己的nodeId
             await model.connection.tcpShake(socket);
         } else {
-            print.error(`cnfNet.js findNodeModel.doFineNode: socket创建失败`)
+            // print.error(`cnfNet.js findNodeModel.doFineNode: socket创建失败`)
         }
 
         findNodeModel.isFinding = false;
@@ -318,6 +326,10 @@ let findNodeModel = {
         return ;
     },
     doShareNeighbor : async function(){
+        // 邻居节点分享开关。
+        if (global.CNF.CONFIG.net.neighborShare != true) {
+            return ;
+        }
         const MAX_NEIGHBOR = 20;
         let neighbors = [];
         // 找邻居，混着tried和new去发
@@ -365,7 +377,7 @@ let findNodeModel = {
     shareNeighborJob : async function(){
         setInterval(async function(){
             await findNodeModel.doShareNeighbor();
-        }, 1000);
+        }, 5000);
         return ;
     }
 }
@@ -492,6 +504,7 @@ let nodeDiscoverModel = {
                 // 过期的握手缓存需要删除掉
                 if (now - global.CNF.netData.discover.doingShake[shakeJob].ts >= 5000) {
                     delete global.CNF.netData.discover.doingShake[shakeJob];
+                    // await model.discover.deleteDoingShake(global.CNF.netData.discover.doingShake[shakeJob])
                 }
             }
         }, 5000);
@@ -573,7 +586,12 @@ let handle = function(){
                 await model.connection.brocast(data);
             },
 
-            socketDestroy : async function(socket, msg) {
+            /**
+             * 
+             * @param {Socket} socket 目标socket
+             * @param {Node} node 目标节点信息（有NodeId即可）
+             */
+            socketDestroy : async function(socket, node) {
                 let now = +new Date();
                 let data = {
                     event : 'socketDestroyEvent',
@@ -586,6 +604,10 @@ let handle = function(){
                 }
                 data = JSON.stringify(data);
                 socket.write(data);
+
+                // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
+                await model.bucket.deleteTryingNode(node);
+                await model.connection.doSocketDestroy(socket);
             }
         },
         node : {

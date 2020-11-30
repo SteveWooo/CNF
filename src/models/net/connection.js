@@ -11,7 +11,7 @@ const Error = require(`${__dirname}/../../utils/Error`);
 const TcpShake = require(`${__dirname}/TcpShake.js`);
 const TcpShakeBack = require(`${__dirname}/TcpShakeBack.js`);
 let model = {};
-const CONFIG = {
+let CONFIG = {
     MAX_INBOUND : 117,
     MAX_OUTBOUND : 40,
     MAX_TEMP : 1024,
@@ -29,6 +29,19 @@ let build = async function(param){
     };
 
     global.CNF.netData.connections = globalConnection;
+
+    /**
+     * 配置初始化
+     */
+    if (global.CNF.CONFIG.net.MAX_INBOUND != undefined) {
+        CONFIG.MAX_INBOUND = global.CNF.CONFIG.net.MAX_INBOUND;
+    }
+    if (global.CNF.CONFIG.net.MAX_OUTBOUND != undefined) {
+        CONFIG.MAX_OUTBOUND = global.CNF.CONFIG.net.MAX_OUTBOUND;
+    }
+    if (global.CNF.CONFIG.net.localhost != undefined) {
+        CONFIG.HOST = global.CNF.CONFIG.net.localhost;
+    }
 
     /**
      * 服务端身份的SOCKET初始化
@@ -64,7 +77,8 @@ function doConnect (node, callbackFunc) {
         });
         socket.on('error', async function(e){
             if(!isConn) {
-                print.error('on connecting error');
+                // 直接就是连不上这个死节点。不管他就行了
+                // print.error('on connecting error');
                 resolve();
                 return ;
             }
@@ -186,24 +200,35 @@ model.getMsgPool = getMsgPool;
  * 插入被链接的INBOUND OUTBOUND SOCKET
  */
 let pushInBoundConnection = async function(socket, node) {
-    if(global.CNF.netData.connections.inBound.legnth >= CONFIG.MAX_INBOUND) {
-        return ;
+    if(global.CNF.netData.connections.inBound.length >= CONFIG.MAX_INBOUND) {
+        // print.error("full!!")
+        return {
+            status : "full"
+        };
     }
     global.CNF.netData.connections.inBound.push({
         node : node,
         socket: socket
     });
+    return {
+        status : "ok"
+    }
 }
 model.pushInBoundConnection = pushInBoundConnection;
 
 let pushOutBoundConnection = async function(socket, node) {
-    if(global.CNF.netData.connections.outBound.legnth >= CONFIG.MAX_OUTBOUND) {
-        return ;
+    if(global.CNF.netData.connections.outBound.length >= CONFIG.MAX_OUTBOUND) {
+        return {
+            status : "full"
+        };
     }
     global.CNF.netData.connections.outBound.push({
         node : node,
         socket: socket
     });
+    return {
+        status : "ok"
+    }
 }
 model.pushOutBoundConnection = pushOutBoundConnection;
 
@@ -299,10 +324,16 @@ let finishTcpShake = async function(socket, node, fromType) {
 
     // TODO 如果加不进去, 就把这个socket断掉
     if(fromType == 'inBoundNodeMsg') {
-        await pushInBoundConnection(socket, node);
+        let result = await pushInBoundConnection(socket, node);
+        if (result.status == "full") {
+            return result;
+        }
     }
     if(fromType == 'outBoundNodeMsg') {
-        await pushOutBoundConnection(socket, node);
+        let result = await pushOutBoundConnection(socket, node);
+        if (result.status == "full") {
+            return result;
+        }
     }
     return {
         status : "ok"
