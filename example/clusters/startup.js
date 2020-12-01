@@ -8,6 +8,7 @@ let Cnf = require(`${__dirname}/../../Cnf.js`);
 const path = require('path');
 const Cluster = require("cluster");
 const fs = require('fs');
+const Express = require("express");
 
 let nodes = [];
 async function buildNodes(){
@@ -27,8 +28,8 @@ async function buildNodes(){
         // }
 
         // nodes.push(conf);
-        delete nodes[i].dataDir;
-        nodes[i].datadir = `${path.resolve(`${__dirname}/datas/${i}`)}`;
+        // nodes[i].datadir = `${path.resolve(`${__dirname}/datas/${i}`)}`;
+        nodes[i].net.networkid = 1;
     }
     fs.writeFileSync(`${__dirname}/nodes.json`, JSON.stringify(nodes));
 }
@@ -111,36 +112,118 @@ async function startup(){
         // }
         
         if (process.env.CONFIG_INDEX == 0) {
-            console.log("=====================process0=========");
-            console.log("tried bucket length:", global.CNF.netData.buckets.tried[0].length)
-            console.log("new bucket length:", global.CNF.netData.buckets.new[0].length)
-            console.log("trying bucket length:", global.CNF.netData.buckets.trying.length)
-            console.log(`neighbor bucket length:`, global.CNF.netData.discover.neighbor.length)
-            // console.log(global.CNF.netData.buckets.new[0])
-            console.log(`inbound connect length :`, global.CNF.netData.connections.inBound.length)
-            console.log(`outbound connect length:`, global.CNF.netData.connections.outBound.length)
-            console.log(`temp connect length:`, global.CNF.netData.connections.temp.length)
-            console.log(`doing shake :`, global.CNF.netData.discover.doingShake);
+            // console.log("=====================process0=========");
+            // console.log("tried bucket length:", global.CNF.netData.buckets.tried[0].length)
+            // console.log("new bucket length:", global.CNF.netData.buckets.new[0].length)
+            // console.log("trying bucket length:", global.CNF.netData.buckets.trying.length)
+            // console.log(`neighbor bucket length:`, global.CNF.netData.discover.neighbor.length)
+            // // console.log(global.CNF.netData.buckets.new[0])
+            // console.log(`inbound connect length :`, global.CNF.netData.connections.inBound.length)
+            // console.log(`outbound connect length:`, global.CNF.netData.connections.outBound.length)
+            // console.log(`temp connect length:`, global.CNF.netData.connections.temp.length)
+            // console.log(`doing shake :`, global.CNF.netData.discover.doingShake);
             // for(var i=0;i<global.CNF.netData.buckets.tried[0].length;i++) {
             //     console.log(global.CNF.netData.buckets.tried[0][i].nodeId);
             // }
+
+            // process.send(`tried bucket length: ${global.CNF.netData.buckets.tried[0].length}`);
         }
+
+        let nodeStatus = {
+            CONFIG : global.CNF.CONFIG,
+            processID : process.env.CONFIG_INDEX,
+
+            triedBucketLength : global.CNF.netData.buckets.tried[0].length,
+            newBucketLength : global.CNF.netData.buckets.new[0].length,
+            tryingBucketLength : global.CNF.netData.buckets.trying.length,
+            neighborLength : global.CNF.netData.discover.neighbor.length,
+
+            inBound : global.CNF.netData.connections.inBound.length,
+            outBound : global.CNF.netData.connections.outBound.length,
+            temp : global.CNF.netData.connections.temp.length,
+
+            connections : global.CNF.netData.connections,
+            buckets : global.CNF.netData.buckets,
+        }
+
+        process.send(nodeStatus);
 
         // console.log(`processID: ${process.env.CONFIG_INDEX}`, global.CNF.netData.buckets.tried[0].length);
     }, 500);
 }
 
+let masterStatus = {
+    workers : [],
+
+    nodes : {}
+}
+
+let masterEvents = {
+    worker : {
+        onMessage : async function(msg) {
+            let nodeInfo = {
+                nodeId : msg.CONFIG.net.publicKey,
+                processID : msg.processID,
+                connections : {
+                    inBound : [],
+                    outBound : []
+                },
+
+                update : +new Date()
+            }
+
+            // 链路情况
+            for(var i=0;i<msg.connections.inBound.length;i++) {
+                nodeInfo.connections.inBound.push(msg.connections.inBound[i].node.nodeId);
+            }
+
+            for(var i=0;i<msg.connections.outBound.length;i++) {
+                nodeInfo.connections.outBound.push(msg.connections.outBound[i].node.nodeId);
+            }
+
+            masterStatus.nodes[nodeInfo.nodeId] = nodeInfo;
+        }
+    }
+}
+
+let masterJob = {
+    httpServer : {
+        init : async function(){
+            let app = Express();
+
+            app.use("/public", Express.static(`${__dirname}/frontEnd`));
+
+            app.get("/api/node_status", async function(req, res) {
+                res.send(JSON.stringify({
+                    status : 2000,
+                    nodes : masterStatus.nodes
+                }));
+            })
+
+            app.listen(80)
+        }
+    }
+}
+
 async function main(){
     if(Cluster.isMaster) {
         for(var i=0;i<40;i++) {
-            Cluster.fork({
+            let worker = Cluster.fork({
                 CONFIG_INDEX : i
             });
+
+            worker.on('message', async function(msg){
+                await masterEvents.worker.onMessage(msg);
+            })
+
+            masterStatus.workers.push(worker);
         }
     
         Cluster.on('exit', function(worker, code, signal){
             console.log(`worker: ${worker.process.pid} died`);
         })
+
+        await masterJob.httpServer.init();
     } else {
         startup();
     }

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Connections</title>
+    <script src="/public/lib/jquery.min.js"></script>
+</head>
+<body>
+    <div>
+        <canvas id="topo"></canvas>
+    </div>
+
+    <script type="text/javascript">
+        function main(){
+            // 全局变量。
+            var masterStatus = {
+                canvas : undefined,
+                ctx : undefined,
+
+                buss : {
+                    nodes : {},
+                    nodeCount : 0
+                }
+            }
+
+            // 业务逻辑中控，细节
+            var bussinessJob = {
+                /**
+                 * 封装向后端获取节点信息的接口
+                 */
+                getNodeData : function(callback){
+                    $.ajax({
+                        url : '/api/node_status',
+                        success : function(res){
+                            res = JSON.parse(res);
+                            if (res.status == 2000) {
+                                // 先处理好节点的位置
+                                for(var nodeId in res.nodes) {
+                                    if (masterStatus.buss.nodes[nodeId] == undefined) {
+                                        var node = res.nodes[nodeId];
+                                        var index = masterStatus.buss.nodeCount ++ ;
+
+                                        var NODE_PER_LINE = 10;
+                                        node.feStatus = {
+                                            x : 100 * (index % NODE_PER_LINE) + 20, // 10个节点一行
+                                            y : 150 * Math.floor(index / NODE_PER_LINE) + 20, // 行间距也是100
+                                            width : 30,
+                                            height : 30,
+                                            centerLocate : {
+                                                x : 0,
+                                                y : 0
+                                            },
+                                            color : 'green', // 节点颜色
+                                        }
+
+                                        // 给中心点加点随机数，看起来舒服点
+                                        var xRandom = Math.random() * node.feStatus.width + (node.feStatus.width / 2);
+                                        var yRandom = Math.random() * node.feStatus.height + (node.feStatus.height / 2);
+
+                                        node.feStatus.x = node.feStatus.x + xRandom;
+                                        node.feStatus.y = node.feStatus.y + yRandom;
+
+                                        node.feStatus.centerLocate.x = node.feStatus.x + node.feStatus.width / 2;
+                                        node.feStatus.centerLocate.y = node.feStatus.y +  node.feStatus.height / 2;
+
+                                        masterStatus.buss.nodes[nodeId] = node;
+
+                                        continue ;
+                                    }
+                                    // 现在主要更新连接状态
+                                    masterStatus.buss.nodes[nodeId].connections = res.nodes[nodeId].connections;
+                                    // masterStatus.buss.nodes[nodeId].buckets = res.nodes[nodesId].buckets;
+                                }
+
+                                callback({
+                                    status : 2000,
+                                    nodes : res.nodes
+                                });
+                                return ;
+                            }
+                        },
+                        error : function(e) {
+                            callback({
+                                status : 5000,
+                                error : e
+                            });
+                            return ;
+                        }
+                    })
+                },
+                /**
+                 * 封装把节点画上画布的接口
+                 */  
+                drawNodeInfoToCanvas : function(){
+                    var ctx = masterStatus.ctx;
+                    var canvas = masterStatus.canvas;
+                    ctx.save();
+
+                    // 背景
+                    ctx.fillStyle = "#1ff";
+                    ctx.fillRect(0, 0, canvas.width(), canvas.height());
+
+                    // 画连线
+                    for(var nodeId in masterStatus.buss.nodes) {
+                        var node = masterStatus.buss.nodes[nodeId];
+                        // 只画出度即可
+                        for(var i=0;i<node.connections.outBound.length;i++) {
+                            let targetNode = masterStatus.buss.nodes[node.connections.outBound[i]];
+                            ctx.strokeStyle = "#ff1";
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+
+                            // 线条的出发点是本节点的中心
+                            ctx.moveTo(node.feStatus.centerLocate.x, node.feStatus.centerLocate.y);
+
+                            // 线条画到目标节点的中心
+                            ctx.lineTo(targetNode.feStatus.centerLocate.x, targetNode.feStatus.centerLocate.y);
+
+                            ctx.stroke();
+                            ctx.closePath();
+                        }
+                    }
+
+                    // 画节点
+                    for(var nodeId in masterStatus.buss.nodes) {
+                        var node = masterStatus.buss.nodes[nodeId];
+                        ctx.fillStyle = node.feStatus.color;
+                        ctx.fillRect(node.feStatus.x, node.feStatus.y, node.feStatus.width, node.feStatus.height);
+                    }
+
+                    ctx.restore();
+                },
+                /**
+                 * 全量更新画布上所有状态的函数入口 
+                 */
+                buildTopo : function(callback){
+                    bussinessJob.getNodeData(function(res) {
+                        if (res.status != 2000) {
+                            callback && callback({
+                                status : res.status,
+                                error : res.e
+                            });
+                            console.error(res.e)
+                            return ;
+                        }
+
+                        bussinessJob.drawNodeInfoToCanvas();
+
+                        callback && callback({
+                            status : res.status
+                        });
+                    })
+                },
+            }
+
+            // 全局中控
+            var masterJob = {
+                init : function(){
+                    masterStatus.canvas = $("#topo");
+                    // 拉满canvas宽度
+                    masterStatus.canvas.attr("width", ($(window).get(0).innerWidth) * 0.99);
+                    masterStatus.canvas.attr("height", "1000px");
+                    masterStatus.ctx = masterStatus.canvas[0].getContext("2d");
+
+                    setInterval(function(){
+                        bussinessJob.buildTopo(function(res) {
+                            
+                        });
+                    }, 500)
+
+                    // bussinessJob.buildTopo(function(res) {
+                            
+                    // });
+                }
+            }
+
+            masterJob.init();
+        }
+        main();
+    </script>
+</body>
+</html>

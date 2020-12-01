@@ -6,7 +6,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30000,
             "connectionTcpServerPort": 30000,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\0"
     },
@@ -17,7 +18,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30001,
             "connectionTcpServerPort": 30001,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\1"
     },
@@ -28,7 +30,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30002,
             "connectionTcpServerPort": 30002,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\2"
     },
@@ -39,7 +42,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30003,
             "connectionTcpServerPort": 30003,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\3"
     },
@@ -50,7 +54,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30004,
             "connectionTcpServerPort": 30004,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\4"
     },
@@ -61,7 +66,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30005,
             "connectionTcpServerPort": 30005,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\5"
     },
@@ -72,7 +78,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30006,
             "connectionTcpServerPort": 30006,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\6"
     },
@@ -83,7 +90,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30007,
             "connectionTcpServerPort": 30007,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\7"
     },
@@ -94,7 +102,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30008,
             "connectionTcpServerPort": 30008,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\8"
     },
@@ -105,7 +114,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30009,
             "connectionTcpServerPort": 30009,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\9"
     },
@@ -116,7 +126,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30010,
             "connectionTcpServerPort": 30010,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\10"
     },
@@ -127,7 +138,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30011,
             "connectionTcpServerPort": 30011,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\11"
     },
@@ -138,7 +150,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30012,
             "connectionTcpServerPort": 30012,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\12"
     },
@@ -149,7 +162,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30013,
             "connectionTcpServerPort": 30013,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\13"
     },
@@ -160,7 +174,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30014,
             "connectionTcpServerPort": 30014,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\14"
     },
@@ -171,7 +186,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30015,
             "connectionTcpServerPort": 30015,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\15"
     },
@@ -182,7 +198,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30016,
             "connectionTcpServerPort": 30016,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\16"
     },
@@ -193,7 +210,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30017,
             "connectionTcpServerPort": 30017,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\17"
     },
@@ -204,7 +222,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30018,
             "connectionTcpServerPort": 30018,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\18"
     },
@@ -215,7 +234,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30019,
             "connectionTcpServerPort": 30019,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\19"
     },
@@ -226,7 +246,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30020,
             "connectionTcpServerPort": 30020,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\20"
     },
@@ -237,7 +258,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30021,
             "connectionTcpServerPort": 30021,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\21"
     },
@@ -248,7 +270,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30022,
             "connectionTcpServerPort": 30022,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\22"
     },
@@ -259,7 +282,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30023,
             "connectionTcpServerPort": 30023,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\23"
     },
@@ -270,7 +294,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30024,
             "connectionTcpServerPort": 30024,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\24"
     },
@@ -281,7 +306,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30025,
             "connectionTcpServerPort": 30025,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\25"
     },
@@ -292,7 +318,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30026,
             "connectionTcpServerPort": 30026,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\26"
     },
@@ -303,7 +330,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30027,
             "connectionTcpServerPort": 30027,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\27"
     },
@@ -314,7 +342,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30028,
             "connectionTcpServerPort": 30028,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\28"
     },
@@ -325,7 +354,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30029,
             "connectionTcpServerPort": 30029,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\29"
     },
@@ -336,7 +366,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30030,
             "connectionTcpServerPort": 30030,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\30"
     },
@@ -347,7 +378,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30031,
             "connectionTcpServerPort": 30031,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\31"
     },
@@ -358,7 +390,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30032,
             "connectionTcpServerPort": 30032,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\32"
     },
@@ -369,7 +402,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30033,
             "connectionTcpServerPort": 30033,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\33"
     },
@@ -380,7 +414,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30034,
             "connectionTcpServerPort": 30034,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\34"
     },
@@ -391,7 +426,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30035,
             "connectionTcpServerPort": 30035,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\35"
     },
@@ -402,7 +438,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30036,
             "connectionTcpServerPort": 30036,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\36"
     },
@@ -413,7 +450,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30037,
             "connectionTcpServerPort": 30037,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\37"
     },
@@ -424,7 +462,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30038,
             "connectionTcpServerPort": 30038,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\38"
     },
@@ -435,7 +474,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30039,
             "connectionTcpServerPort": 30039,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\39"
     },
@@ -446,7 +486,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30040,
             "connectionTcpServerPort": 30040,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\40"
     },
@@ -457,7 +498,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30041,
             "connectionTcpServerPort": 30041,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\41"
     },
@@ -468,7 +510,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30042,
             "connectionTcpServerPort": 30042,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\42"
     },
@@ -479,7 +522,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30043,
             "connectionTcpServerPort": 30043,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\43"
     },
@@ -490,7 +534,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30044,
             "connectionTcpServerPort": 30044,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\44"
     },
@@ -501,7 +546,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30045,
             "connectionTcpServerPort": 30045,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\45"
     },
@@ -512,7 +558,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30046,
             "connectionTcpServerPort": 30046,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\46"
     },
@@ -523,7 +570,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30047,
             "connectionTcpServerPort": 30047,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\47"
     },
@@ -534,7 +582,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30048,
             "connectionTcpServerPort": 30048,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\48"
     },
@@ -545,7 +594,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30049,
             "connectionTcpServerPort": 30049,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\49"
     },
@@ -556,7 +606,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30050,
             "connectionTcpServerPort": 30050,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\50"
     },
@@ -567,7 +618,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30051,
             "connectionTcpServerPort": 30051,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\51"
     },
@@ -578,7 +630,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30052,
             "connectionTcpServerPort": 30052,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\52"
     },
@@ -589,7 +642,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30053,
             "connectionTcpServerPort": 30053,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\53"
     },
@@ -600,7 +654,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30054,
             "connectionTcpServerPort": 30054,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\54"
     },
@@ -611,7 +666,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30055,
             "connectionTcpServerPort": 30055,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\55"
     },
@@ -622,7 +678,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30056,
             "connectionTcpServerPort": 30056,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\56"
     },
@@ -633,7 +690,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30057,
             "connectionTcpServerPort": 30057,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\57"
     },
@@ -644,7 +702,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30058,
             "connectionTcpServerPort": 30058,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\58"
     },
@@ -655,7 +714,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30059,
             "connectionTcpServerPort": 30059,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\59"
     },
@@ -666,7 +726,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30060,
             "connectionTcpServerPort": 30060,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\60"
     },
@@ -677,7 +738,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30061,
             "connectionTcpServerPort": 30061,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\61"
     },
@@ -688,7 +750,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30062,
             "connectionTcpServerPort": 30062,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\62"
     },
@@ -699,7 +762,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30063,
             "connectionTcpServerPort": 30063,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\63"
     },
@@ -710,7 +774,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30064,
             "connectionTcpServerPort": 30064,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\64"
     },
@@ -721,7 +786,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30065,
             "connectionTcpServerPort": 30065,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\65"
     },
@@ -732,7 +798,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30066,
             "connectionTcpServerPort": 30066,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\66"
     },
@@ -743,7 +810,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30067,
             "connectionTcpServerPort": 30067,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\67"
     },
@@ -754,7 +822,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30068,
             "connectionTcpServerPort": 30068,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\68"
     },
@@ -765,7 +834,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30069,
             "connectionTcpServerPort": 30069,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\69"
     },
@@ -776,7 +846,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30070,
             "connectionTcpServerPort": 30070,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\70"
     },
@@ -787,7 +858,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30071,
             "connectionTcpServerPort": 30071,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\71"
     },
@@ -798,7 +870,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30072,
             "connectionTcpServerPort": 30072,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\72"
     },
@@ -809,7 +882,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30073,
             "connectionTcpServerPort": 30073,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\73"
     },
@@ -820,7 +894,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30074,
             "connectionTcpServerPort": 30074,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\74"
     },
@@ -831,7 +906,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30075,
             "connectionTcpServerPort": 30075,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\75"
     },
@@ -842,7 +918,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30076,
             "connectionTcpServerPort": 30076,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\76"
     },
@@ -853,7 +930,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30077,
             "connectionTcpServerPort": 30077,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\77"
     },
@@ -864,7 +942,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30078,
             "connectionTcpServerPort": 30078,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\78"
     },
@@ -875,7 +954,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30079,
             "connectionTcpServerPort": 30079,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\79"
     },
@@ -886,7 +966,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30080,
             "connectionTcpServerPort": 30080,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\80"
     },
@@ -897,7 +978,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30081,
             "connectionTcpServerPort": 30081,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\81"
     },
@@ -908,7 +990,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30082,
             "connectionTcpServerPort": 30082,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\82"
     },
@@ -919,7 +1002,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30083,
             "connectionTcpServerPort": 30083,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\83"
     },
@@ -930,7 +1014,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30084,
             "connectionTcpServerPort": 30084,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\84"
     },
@@ -941,7 +1026,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30085,
             "connectionTcpServerPort": 30085,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\85"
     },
@@ -952,7 +1038,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30086,
             "connectionTcpServerPort": 30086,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\86"
     },
@@ -963,7 +1050,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30087,
             "connectionTcpServerPort": 30087,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\87"
     },
@@ -974,7 +1062,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30088,
             "connectionTcpServerPort": 30088,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\88"
     },
@@ -985,7 +1074,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30089,
             "connectionTcpServerPort": 30089,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\89"
     },
@@ -996,7 +1086,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30090,
             "connectionTcpServerPort": 30090,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\90"
     },
@@ -1007,7 +1098,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30091,
             "connectionTcpServerPort": 30091,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\91"
     },
@@ -1018,7 +1110,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30092,
             "connectionTcpServerPort": 30092,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\92"
     },
@@ -1029,7 +1122,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30093,
             "connectionTcpServerPort": 30093,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\93"
     },
@@ -1040,7 +1134,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30094,
             "connectionTcpServerPort": 30094,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\94"
     },
@@ -1051,7 +1146,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30095,
             "connectionTcpServerPort": 30095,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\95"
     },
@@ -1062,7 +1158,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30096,
             "connectionTcpServerPort": 30096,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\96"
     },
@@ -1073,7 +1170,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30097,
             "connectionTcpServerPort": 30097,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\97"
     },
@@ -1084,7 +1182,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30098,
             "connectionTcpServerPort": 30098,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\98"
     },
@@ -1095,7 +1194,8 @@
             "localhost": "127.0.0.1",
             "discoverUdpPort": 30099,
             "connectionTcpServerPort": 30099,
-            "seed": []
+            "seed": [],
+            "networkid": 1
         },
         "datadir": "D:\\projects\\blockChain\\CNF\\example\\clusters\\datas\\99"
     }

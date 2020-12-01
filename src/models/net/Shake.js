@@ -29,8 +29,8 @@ function Shake(node, type){
         from : {
             ip : global.CNF.CONFIG.net.localhost,
             udpport : global.CNF.CONFIG.net.discoverUdpPort,
-            tcpport : global.CNF.CONFIG.net.connectionTcpServerPort
-            
+            tcpport : global.CNF.CONFIG.net.connectionTcpServerPort,
+            networkid : global.CNF.CONFIG.net.networkid
         }
     }
 

@@ -35,6 +35,13 @@ let receiveTcpMsgModel = {
             data.msg = JSON.parse(data.msg);
             let node = new model.Node(data.msg.from);
 
+            // 检查networkid，不允许networkid不一致的节点加入网络
+            if (data.msg.from.networkid != global.CNF.CONFIG.net.networkid) {
+                await global.CNF.net.msg.socketDestroy(socket, node);
+                // print.error("tcp shake中出现networkid不一致的节点");
+                return ;
+            }
+
             // 只把主动连接的节点放tried, 被动链接的不放
             if(fromType == 'outBoundNodeMsg') {
                 let result = await model.connection.finishTcpShake(socket, node, fromType);
@@ -57,6 +64,13 @@ let receiveTcpMsgModel = {
             // console.log('get shake');
             data.msg = JSON.parse(data.msg);
             let node = new model.Node(data.msg.from);
+
+            // 检查networkid，不允许networkid不一致的节点加入网络
+            if (data.msg.from.networkid != global.CNF.CONFIG.net.networkid) {
+                await global.CNF.net.msg.socketDestroy(socket, node);
+                // print.error("tcp shake中出现networkid不一致的节点");
+                return ;
+            }
             
             // 把节点从tempConnection放到inBound
             if(fromType == 'inBoundNodeMsg') {
@@ -444,6 +458,13 @@ let nodeDiscoverModel = {
         }
         nodeDiscoverModel.isDetecting = true;
         // TODO: 检测协议合法性。
+
+        // 首先判断newworkid是否一致
+        if (message.msg.from.networkid == undefined || message.msg.from.networkid != global.CNF.CONFIG.net.networkid) {
+            // print.error("udp发现过程中出现networkid不一致的节点");
+            nodeDiscoverModel.isDetecting = false;
+            return ;
+        }
 
         // 这里识别包类型
         if(message.msg.type == model.discover.CONFIG.PING_TYPE) {
