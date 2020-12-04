@@ -9,6 +9,7 @@ const path = require('path');
 const Cluster = require("cluster");
 const fs = require('fs');
 const Express = require("express");
+const print = require(`${__dirname}/../../src/utils/print.js`);
 
 let nodes = [];
 async function buildNodes(){
@@ -67,6 +68,11 @@ async function startup(){
             })
         }
     }
+
+    /**
+     * Config datadir have to be rewrite in linux system.
+     */
+    conf.datadir = `${__dirname}/datas/${process.env.CONFIG_INDEX}`;
 
     /**
      * 把上面的配置载入
@@ -199,15 +205,17 @@ let masterJob = {
                     nodes : masterStatus.nodes
                 }));
             })
-
-            app.listen(80)
+	    let port = 8081;
+            app.listen(port, function(){
+	    	print.info(`Node already listen at ${port}`);
+	    })
         }
     }
 }
 
 async function main(){
     if(Cluster.isMaster) {
-        for(var i=0;i<40;i++) {
+        for(var i=0;i<4;i++) {
             let worker = Cluster.fork({
                 CONFIG_INDEX : i
             });
