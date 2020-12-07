@@ -75,6 +75,11 @@ async function startup(){
     conf.datadir = `${__dirname}/datas/${process.env.CONFIG_INDEX}`;
 
     /**
+     * 使用邻居自动分享策略
+     */
+    // conf.net.neighborAutoShare = true; // default false
+
+    /**
      * 把上面的配置载入
      */
     let cnf = new Cnf();
@@ -95,6 +100,8 @@ async function startup(){
         }
     })
 
+    
+
     /**
      * 启动组网流程，从seed出发寻找所有可用的节点
      */
@@ -102,6 +109,19 @@ async function startup(){
     nodes = require(`${__dirname}/nodes.json`);
 
     setInterval(async function(){
+        if (process.env.CONFIG_INDEX == 0) {
+            // 拿第四个节点的 socket, nodeId: 04325a2cf3fefc0b25fb5091d376ded657bc3d309fbcf28a39c83ebc5181f48c50b2284fc673e2b2ddd964d351e29e0010883be9e5ed937602b3b1cd9de92124cf
+            let conn = await global.CNF.net.node.connect.getConnectionByNodeId("04325a2cf3fefc0b25fb5091d376ded657bc3d309fbcf28a39c83ebc5181f48c50b2284fc673e2b2ddd964d351e29e0010883be9e5ed937602b3b1cd9de92124cf");
+            
+            let masterNode1 = await global.CNF.net.node.bucket.getNodeByNodeId("04e374a733877794c6d65c16e93e87562a3596f43bd2fd4fc55a2fae4af3c5a51c4526158ae076fed59ebd4253444a62ea7c23104c506bebd99d3e0848c26883db");
+            let masterNode2 = await global.CNF.net.node.bucket.getNodeByNodeId("04690393fe43fc4a0c39f0833712d22d345a8705703ec61cd4a9f4d2452cdd5625c7a2ecbdb200817c0a3719622abc71ff9d5d50bda4e6e60beec7d8f7943d5a4c");
+
+            if (conn != undefined && masterNode1 != undefined && masterNode2 != undefined) {
+                await global.CNF.net.msg.sendNeighbor(conn.socket, {
+                    neighbor : [masterNode1, masterNode2]
+                })
+            }
+        }
         // if (global.CNF.netData.connections.outBound.length == 0 && global.CNF.netData.connections.inBound.length == 0) {
         //     console.log("=====================");
         //     console.log(`processID: ${process.env.CONFIG_INDEX}`);

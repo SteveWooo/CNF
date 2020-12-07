@@ -57,10 +57,10 @@ module.exports = function() {
             global.CNF.CONFIG.net.neighborReceive = true;
         }
 
-        if (param.config.net.neighborShare == true || param.config.net.neighborShare == false) {
-            global.CNF.CONFIG.net.neighborShare = param.config.net.neighborShare;
+        if (param.config.net.neighborAutoShare == true || param.config.net.neighborAutoShare == false) {
+            global.CNF.CONFIG.net.neighborAutoShare = param.config.net.neighborAutoShare;
         } else {
-            global.CNF.CONFIG.net.neighborShare = true;
+            global.CNF.CONFIG.net.neighborAutoShare = false; // Auto share function default as false. To make the hole net connected, we only need to share enough neighbor.
         }
 
         // 连接量的配置

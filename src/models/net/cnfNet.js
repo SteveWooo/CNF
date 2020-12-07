@@ -339,9 +339,14 @@ let findNodeModel = {
         }, 500);
         return ;
     },
-    doShareNeighbor : async function(){
+
+    /**
+     * The core logic of Neighbor sharing.
+     * Neighbor sharing logic works like the routing. 
+     */
+    doAutoShareNeighbor : async function(){
         // 邻居节点分享开关。
-        if (global.CNF.CONFIG.net.neighborShare != true) {
+        if (global.CNF.CONFIG.net.neighborAutoShare != true) {
             return ;
         }
         const MAX_NEIGHBOR = 20;
@@ -379,7 +384,7 @@ let findNodeModel = {
         }
 
         // 发送给邻居
-        await global.CNF.net.msg.neighbor({
+        await global.CNF.net.msg.autoShareNeighbor({
             neighbor : neighbors
         })
 
@@ -388,9 +393,9 @@ let findNodeModel = {
     /**
      * 在寻找桶里节点进行连接的同时，还需要把自己的两个桶的节点分享给已连接的节点。
      */
-    shareNeighborJob : async function(){
+    autoShareNeighborJob : async function(){
         setInterval(async function(){
-            await findNodeModel.doShareNeighbor();
+            await findNodeModel.doAutoShareNeighbor();
         }, 5000);
         return ;
     }
@@ -598,7 +603,21 @@ let handle = function(){
                 socket.write(data);
             },
 
-            neighbor : async function(msg) {
+            /**
+             * Share neighbors data to target socket.
+             * @msg neightbor: The object in Bucket.
+             */
+            sendNeighbor : async function(socket, msg) {
+                let data = {
+                    event : 'neighborEvent',
+                    neighbor : msg.neighbor
+                }
+
+                data = JSON.stringify(data);
+                socket.write(data);
+            },
+
+            autoShareNeighbor : async function(msg) {
                 let data = {
                     event : 'neighborEvent',
                     neighbor : msg.neighbor
@@ -643,9 +662,17 @@ let handle = function(){
                 // 从bucket中找人连接
                 await findNodeModel.findNodeJob();
                 // 同时把自己的桶分享给邻居
-                await findNodeModel.shareNeighborJob();
+                await findNodeModel.autoShareNeighborJob();
                 print.info(`Node started ! `);
                 return ;
+            },
+
+            bucket : {
+                getNodeByNodeId : model.bucket.getNodeByNodeId
+            },
+
+            connect : {
+                getConnectionByNodeId : model.connection.getConnectionByNodeId
             }
         }
     }

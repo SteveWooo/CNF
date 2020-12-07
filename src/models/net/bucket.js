@@ -60,6 +60,33 @@ let getNodeFromBucket = async function(bucketName) {
 model.getNodeFromBucket = getNodeFromBucket;
 
 /**
+ * Get a Node object from newBucket and triedBucket by NodeId. 
+ * This function first used for Neighbor share logic.
+ */
+let getNodeByNodeId = async function(nodeId){
+    let node = undefined;
+    for(var i=0;i<global.CNF.netData.buckets.tried.length;i++) {
+        for(var k=0;k<global.CNF.netData.buckets.tried[i].length;k++) {
+            if(nodeId == global.CNF.netData.buckets.tried[i][k].nodeId) {
+                return global.CNF.netData.buckets.tried[i][k];
+            }
+        }
+    }
+
+    for(var i=0;i<global.CNF.netData.buckets.new.length;i++) {
+        for(var k=0;k<global.CNF.netData.buckets.new[i].length;k++) {
+            if(nodeId == global.CNF.netData.buckets.new[i][k].nodeId) {
+                return global.CNF.netData.buckets.new[i][k];
+            }
+        }
+    }
+
+    return node;
+
+}
+model.getNodeByNodeId = getNodeByNodeId;
+
+/**
  * 用于检查这个Node是否已经在桶里。因为已经在桶里，就不重复ping了
  */
 let isNodeAlreadyInBucket = async function(node) {

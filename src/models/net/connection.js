@@ -355,4 +355,22 @@ let brocast = async function(data){
 }
 model.brocast = brocast;
 
+// 通过nodeId获得连接对象
+let getConnectionByNodeId = async function(nodeId) {
+    for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
+        if (nodeId == global.CNF.netData.connections.inBound[i].node.nodeId) {
+            return global.CNF.netData.connections.inBound[i];
+        }
+    }
+
+    for(var i=0;i<global.CNF.netData.connections.outBound.length;i++) {
+        if (nodeId == global.CNF.netData.connections.outBound[i].node.nodeId) {
+            return global.CNF.netData.connections.outBound[i];
+        }
+    }
+
+    return undefined;
+}
+model.getConnectionByNodeId = getConnectionByNodeId;
+
 module.exports = model;
