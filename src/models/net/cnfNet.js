@@ -156,19 +156,23 @@ let receiveTcpMsgModel = {
                 msg : data
             });
         },
-        brocastEvent : async function(socket, data, fromType) {
+
+        // 本质上是在广播OriginMsg
+        brocastEvent : async function(socket, brocastData, fromType) {
             if(!(await model.connection.isAlreadyTcpShake(socket))) {
+                print.warn("connection not ready");
                 return ;
             }
 
             let now = +new Date()
             // 十分钟之前的数据包不做处理
-            if (now - data.originMsg.createAt >= 10 * 60 * 1000) {
+            if (now - brocastData.originMsg.createAt >= 10 * 60 * 1000) {
+                print.warn("msg timeout.");
                 return ;
             }
 
             // 判断在不在缓存里面，如果在，说明已经转发过，不需要处理了
-            if (model.brocastPool.isCached(socket, data, fromType) == true) {
+            if (model.brocastPool.isCached(socket, brocastData, fromType) == true) {
                 return ;
             }
 
@@ -176,14 +180,14 @@ let receiveTcpMsgModel = {
             await model.connection.pushMsgPool({
                 fromType : fromType,
                 socket : socket,
-                msg : data
+                brocastData : brocastData
             });
 
             // 转发到所有已知节点
             let transData = {
                 event : 'brocastEvent',
                 // 保留原始信息
-                originMsg : data.originMsg,
+                originMsg : brocastData.originMsg,
                 // 放置发送方消息
                 from : {
                     nodeInfo : {
@@ -191,13 +195,13 @@ let receiveTcpMsgModel = {
                     },
                     createAt : now
                 },
-                hop : data.hop + 1
+                hop : brocastData.hop + 1
             }
             transData = JSON.stringify(transData);
             await model.connection.brocast(transData);
 
             // 放入池子里，下次收到这条信息就不转发了
-            model.brocastPool.pushCache(socket, data, fromType);
+            model.brocastPool.pushCache(socket, brocastData, fromType);
         }
     },
 
@@ -552,11 +556,16 @@ let handle = function(){
                 
                 // 定期捞msgPool里面的东西出来回调给业务方。
                 setInterval(async function(){
-                    let msg = await model.connection.getMsgPool();
-                    if(msg !== undefined) {
+                    let msgCache = await model.connection.getMsgPool();
+                    if(msgCache !== undefined) {
                         await param.netCallback({
-                            socket : msg.socket,
-                            msg : msg.msg
+                            socket : msgCache.socket,
+
+                            // 透传广播数据
+                            brocastData : msgCache.brocastData,
+
+                            // 额外字段
+                            message : msgCache.brocastData.originMsg.msg
                         });
                     }
                 }, 16);
@@ -566,7 +575,7 @@ let handle = function(){
             // 广播一段bussEvent消息，这是主动发送的广播数据包格式。上面brocastEvent中有被动转发的brocast包格式。
             brocast : async function(msg){
                 let now = +new Date();
-                let data = {
+                let brocastData = {
                     event : 'brocastEvent',
                     // 保留原始信息
                     originMsg : {
@@ -588,10 +597,10 @@ let handle = function(){
                     hop : 0
                 }
                 // 放入池子里，下次收到这条信息就不转发了
-                model.brocastPool.pushCache(undefined, data, undefined);
+                model.brocastPool.pushCache(undefined, brocastData, undefined);
 
-                data = JSON.stringify(data);
-                await model.connection.brocast(data);
+                brocastData = JSON.stringify(brocastData);
+                await model.connection.brocast(brocastData);
             },
 
             send : async function(socket, msg) {

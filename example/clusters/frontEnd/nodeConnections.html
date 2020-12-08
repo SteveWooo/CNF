@@ -37,11 +37,12 @@
                             if (res.status == 2000) {
                                 // 先处理好节点的位置
                                 for(var nodeId in res.nodes) {
+                                    // 初次处理
                                     if (masterStatus.buss.nodes[nodeId] == undefined) {
                                         var node = res.nodes[nodeId];
                                         var index = masterStatus.buss.nodeCount ++ ;
 
-                                        var NODE_PER_LINE = 2;
+                                        var NODE_PER_LINE = 8;
                                         node.feStatus = {
                                             x : 100 * (index % NODE_PER_LINE) + 20, // 10个节点一行
                                             y : 150 * Math.floor(index / NODE_PER_LINE) + 20, // 行间距也是100
@@ -68,8 +69,13 @@
 
                                         continue ;
                                     }
-                                    // 现在主要更新连接状态
+                                    // 更新处理
+
+                                    // 更新连接状态
                                     masterStatus.buss.nodes[nodeId].connections = res.nodes[nodeId].connections;
+
+                                    // 消息状态
+                                    masterStatus.buss.nodes[nodeId].state = res.nodes[nodeId].state;
                                     // masterStatus.buss.nodes[nodeId].buckets = res.nodes[nodesId].buckets;
                                 }
 
@@ -127,6 +133,16 @@
                         var node = masterStatus.buss.nodes[nodeId];
                         ctx.fillStyle = node.feStatus.color;
                         ctx.fillRect(node.feStatus.x, node.feStatus.y, node.feStatus.width, node.feStatus.height);
+                    }
+
+                    // 写lastMsg
+                    for (var nodeId in masterStatus.buss.nodes) {
+                        var node = masterStatus.buss.nodes[nodeId];
+                        ctx.fillStyle = "red";
+                        ctx.font = "15px '微软雅黑'";
+                        ctx.textAlign = "left";
+                        ctx.shadowBlur = 10;
+                        ctx.fillText(node.state.lastMsg, node.feStatus.x, node.feStatus.y);
                     }
 
                     ctx.restore();

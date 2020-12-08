@@ -92,15 +92,10 @@ async function startup(){
      */
     await cnf.net.msg.registerMsgEvent({
         netCallback : async function(data){
-            // console.log(`receive data : `);
-            // console.log(data.msg);
-            // await cnf.net.msg.send(data.socket, 'receive');
-            
-            console.log(`processID: ${process.env.CONFIG_INDEX}`, global.CNF.netData.buckets.tried[0].length)
+            console.log(`${process.env.CONFIG_INDEX} node receive data : `, data.message);
+            global.CNF.state.lastMsg = data.brocastData.originMsg.msg.key;
         }
     })
-
-    
 
     /**
      * 启动组网流程，从seed出发寻找所有可用的节点
@@ -108,20 +103,36 @@ async function startup(){
     await cnf.net.node.startup();
     nodes = require(`${__dirname}/nodes.json`);
 
-    setInterval(async function(){
-        if (process.env.CONFIG_INDEX == 0) {
-            // 拿第四个节点的 socket, nodeId: 04325a2cf3fefc0b25fb5091d376ded657bc3d309fbcf28a39c83ebc5181f48c50b2284fc673e2b2ddd964d351e29e0010883be9e5ed937602b3b1cd9de92124cf
-            let conn = await global.CNF.net.node.connect.getConnectionByNodeId("04325a2cf3fefc0b25fb5091d376ded657bc3d309fbcf28a39c83ebc5181f48c50b2284fc673e2b2ddd964d351e29e0010883be9e5ed937602b3b1cd9de92124cf");
-            
-            let masterNode1 = await global.CNF.net.node.bucket.getNodeByNodeId("04e374a733877794c6d65c16e93e87562a3596f43bd2fd4fc55a2fae4af3c5a51c4526158ae076fed59ebd4253444a62ea7c23104c506bebd99d3e0848c26883db");
-            let masterNode2 = await global.CNF.net.node.bucket.getNodeByNodeId("04690393fe43fc4a0c39f0833712d22d345a8705703ec61cd4a9f4d2452cdd5625c7a2ecbdb200817c0a3719622abc71ff9d5d50bda4e6e60beec7d8f7943d5a4c");
+    /**
+     * 写一些全局状态
+     */
+    global.CNF.state.lastMsg = "";
 
-            if (conn != undefined && masterNode1 != undefined && masterNode2 != undefined) {
-                await global.CNF.net.msg.sendNeighbor(conn.socket, {
-                    neighbor : [masterNode1, masterNode2]
-                })
-            }
-        }
+    if (process.env.CONFIG_INDEX == 0) {
+        setTimeout(async function(){
+            global.CNF.net.msg.brocast({
+                key : 'value'
+            })
+            print.info(`Process 0 has send data.`);
+        }, 8000)
+    }
+
+    setInterval(async function(){
+        // Demo for manual connect. 
+        // if (process.env.CONFIG_INDEX == 0) {
+        //     // 拿第四个节点的 socket, nodeId: 04325a2cf3fefc0b25fb5091d376ded657bc3d309fbcf28a39c83ebc5181f48c50b2284fc673e2b2ddd964d351e29e0010883be9e5ed937602b3b1cd9de92124cf
+        //     let conn = await global.CNF.net.node.connect.getConnectionByNodeId("04325a2cf3fefc0b25fb5091d376ded657bc3d309fbcf28a39c83ebc5181f48c50b2284fc673e2b2ddd964d351e29e0010883be9e5ed937602b3b1cd9de92124cf");
+            
+        //     let masterNode1 = await global.CNF.net.node.bucket.getNodeByNodeId("04e374a733877794c6d65c16e93e87562a3596f43bd2fd4fc55a2fae4af3c5a51c4526158ae076fed59ebd4253444a62ea7c23104c506bebd99d3e0848c26883db");
+        //     let masterNode2 = await global.CNF.net.node.bucket.getNodeByNodeId("04690393fe43fc4a0c39f0833712d22d345a8705703ec61cd4a9f4d2452cdd5625c7a2ecbdb200817c0a3719622abc71ff9d5d50bda4e6e60beec7d8f7943d5a4c");
+
+        //     if (conn != undefined && masterNode1 != undefined && masterNode2 != undefined) {
+        //         await global.CNF.net.msg.sendNeighbor(conn.socket, {
+        //             neighbor : [masterNode1, masterNode2]
+        //         })
+        //     }
+        // }
+
         // if (global.CNF.netData.connections.outBound.length == 0 && global.CNF.netData.connections.inBound.length == 0) {
         //     console.log("=====================");
         //     console.log(`processID: ${process.env.CONFIG_INDEX}`);
@@ -159,17 +170,23 @@ async function startup(){
             CONFIG : global.CNF.CONFIG,
             processID : process.env.CONFIG_INDEX,
 
+            // Routing state
             triedBucketLength : global.CNF.netData.buckets.tried[0].length,
             newBucketLength : global.CNF.netData.buckets.new[0].length,
             tryingBucketLength : global.CNF.netData.buckets.trying.length,
             neighborLength : global.CNF.netData.discover.neighbor.length,
 
+            // Connection state
             inBound : global.CNF.netData.connections.inBound.length,
             outBound : global.CNF.netData.connections.outBound.length,
             temp : global.CNF.netData.connections.temp.length,
-
+            
+            // Connection and Routing data
             connections : global.CNF.netData.connections,
             buckets : global.CNF.netData.buckets,
+
+            // Normal state
+            state : global.CNF.state
         }
 
         process.send(nodeStatus);
@@ -195,7 +212,9 @@ let masterEvents = {
                     outBound : []
                 },
 
-                update : +new Date()
+                update : +new Date(),
+
+                state : msg.state
             }
 
             // 链路情况
@@ -235,7 +254,7 @@ let masterJob = {
 
 async function main(){
     if(Cluster.isMaster) {
-        for(var i=0;i<4;i++) {
+        for(var i=0;i<40;i++) {
             let worker = Cluster.fork({
                 CONFIG_INDEX : i
             });
