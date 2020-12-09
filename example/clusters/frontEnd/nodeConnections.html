@@ -42,7 +42,7 @@
                                         var node = res.nodes[nodeId];
                                         var index = masterStatus.buss.nodeCount ++ ;
 
-                                        var NODE_PER_LINE = 8;
+                                        var NODE_PER_LINE = 10;
                                         node.feStatus = {
                                             x : 100 * (index % NODE_PER_LINE) + 20, // 10个节点一行
                                             y : 150 * Math.floor(index / NODE_PER_LINE) + 20, // 行间距也是100
@@ -76,6 +76,9 @@
 
                                     // 消息状态
                                     masterStatus.buss.nodes[nodeId].state = res.nodes[nodeId].state;
+
+                                    // 节点状态
+                                    masterStatus.buss.nodes[nodeId].nodeStatus = res.nodes[nodeId].nodeStatus;
                                     // masterStatus.buss.nodes[nodeId].buckets = res.nodes[nodesId].buckets;
                                 }
 
@@ -131,7 +134,12 @@
                     // 画节点
                     for(var nodeId in masterStatus.buss.nodes) {
                         var node = masterStatus.buss.nodes[nodeId];
-                        ctx.fillStyle = node.feStatus.color;
+                        
+                        if (node.nodeStatus == 'normal') {
+                            ctx.fillStyle = node.feStatus.color;
+                        } else {
+                            ctx.fillStyle = "red";
+                        }
                         ctx.fillRect(node.feStatus.x, node.feStatus.y, node.feStatus.width, node.feStatus.height);
                     }
 
@@ -142,7 +150,7 @@
                         ctx.font = "15px '微软雅黑'";
                         ctx.textAlign = "left";
                         ctx.shadowBlur = 10;
-                        ctx.fillText(node.state.lastMsg, node.feStatus.x, node.feStatus.y);
+                        ctx.fillText(node.state.lastMsg.length, node.feStatus.x, node.feStatus.y);
                     }
 
                     ctx.restore();

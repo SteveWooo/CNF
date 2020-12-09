@@ -4,8 +4,8 @@
  * Email  : SteveWoo23@gmail.com
  * Github : https://github.com/stevewooo
  */
-const Error = require(`${__dirname}/../../utils/Error`);
-const print = require(`${__dirname}/../../utils/print`);
+const Error = global.CNF.utils.Error;
+const print = global.CNF.utils.print;
 let model = {};
 const CONFIG = {
     TRIED_BUCKET_TOTAL : 16,
@@ -231,7 +231,7 @@ let deleteTryingNode = async function(node) {
         }
     }
     if(temp != undefined) {
-        print.info("delete trying node successful")
+        // print.info("delete trying node successful")
     }
     return temp;
 }

@@ -8,25 +8,27 @@
 const path = require('path');
 const fs = require('fs');
 const print = require(`${__dirname}/../utils/print`);
-const argv = require(`${__dirname}/../utils/argv`);
-const Error = require(`${__dirname}/../utils/Error.js`);
 
 module.exports = function() {
     let that = this;
 
     let cnf = {};
-    /**
-     * 拿控制台参数
-     */
-    cnf.argv = argv.getArgv();
 
     /**
      * 集成常用工具库，需要根据具体项目实施
      */
     cnf.utils = {
         print : require(`${__dirname}/../utils/print`),
-        sign : require(`${__dirname}/utils/sign`),
+        sign : require(`${__dirname}/../utils/sign`),
+        argv : require(`${__dirname}/../utils/argv`),
+        Error : require(`${__dirname}/../utils/Error.js`),
+        timer : require(`${__dirname}/../utils/timer.js`),
     }
+
+    /**
+     * 拿控制台参数
+     */
+    cnf.argv = cnf.utils.argv.getArgv();
 
     /**
      * 在构建函数中统一调用初始化函数。目的是构建global.CNF中的对象数据结构

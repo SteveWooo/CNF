@@ -5,9 +5,6 @@
  * Github : https://github.com/stevewooo
  */
 
-const sign = require(`${__dirname}/../utils/sign`);
-const crypto = require('crypto');
-const print = require(`${__dirname}/../../utils/print`);
 const CONFIG = {
     VERSION : 1,
 }
@@ -30,7 +27,7 @@ function Shake(){
     }
     msg = JSON.stringify(msg);
     let data = {
-        event: 'shakeEvent',
+        event: 'shakeBackEvent',
         msg : msg
     }
 

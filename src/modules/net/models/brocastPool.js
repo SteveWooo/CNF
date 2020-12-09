@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const CONFIG = {
-    MAX_CACHE : 1000
+    MAX_CACHE : 1024
 }
 /**
  * 判断这个数据是否已经发送出去，并缓存

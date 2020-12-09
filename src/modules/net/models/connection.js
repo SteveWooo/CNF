@@ -5,15 +5,15 @@
  * Github : https://github.com/stevewooo
  */
 const net = require('net');
-const { config } = require('process');
-const print = require(`${__dirname}/../../utils/print`);
-const Error = require(`${__dirname}/../../utils/Error`);
+const print = global.CNF.utils.print;
+const Error = global.CNF.utils.Error;
+
 const TcpShake = require(`${__dirname}/TcpShake.js`);
 const TcpShakeBack = require(`${__dirname}/TcpShakeBack.js`);
 let model = {};
 let CONFIG = {
     MAX_INBOUND : 117,
-    MAX_OUTBOUND : 40,
+    MAX_OUTBOUND : 8,
     MAX_TEMP : 1024,
     HOST : '127.0.0.1',
     MSG_POOL_LENGTH : 1024
@@ -346,10 +346,18 @@ model.finishTcpShake = finishTcpShake;
  */
 let brocast = async function(data){
     for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
-        global.CNF.netData.connections.inBound[i].socket.write(data);
+        try{
+            global.CNF.netData.connections.inBound[i].socket.write(data);
+        }catch(e) {
+            // 不处理
+        }
     }
     for(var i=0;i<global.CNF.netData.connections.outBound.length;i++) {
-        global.CNF.netData.connections.outBound[i].socket.write(data);
+        try{
+            global.CNF.netData.connections.outBound[i].socket.write(data);
+        }catch(e) {
+            // 不处理
+        }
     }
     // console.log('done brocast');
 }

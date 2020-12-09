@@ -1,3 +1,3 @@
-module.exports = require(`${__dirname}/src/models/Cnf.js`);
+module.exports = require(`${__dirname}/src/modules/Cnf.js`);
 
 

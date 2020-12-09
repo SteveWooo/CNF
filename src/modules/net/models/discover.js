@@ -10,10 +10,10 @@
  */
 
 const dgram = require('dgram');
-const print = require(`${__dirname}/../../utils/print`);
+const print = global.CNF.utils.print;
 const Node = require(`${__dirname}/Node`);
 const Shake = require(`${__dirname}/Shake`);
-const sign = require(`${__dirname}/../utils/sign`);
+const sign = global.CNF.utils.sign;
 let model = {};
 const CONFIG = {
     PING_TYPE: 1,

@@ -92,8 +92,9 @@ async function startup(){
      */
     await cnf.net.msg.registerMsgEvent({
         netCallback : async function(data){
-            console.log(`${process.env.CONFIG_INDEX} node receive data : `, data.message);
-            global.CNF.state.lastMsg = data.brocastData.originMsg.msg.key;
+            // console.log(data)
+            // console.log(`${process.env.CONFIG_INDEX} node receive data : `, data.message);
+            global.CNF.state.lastMsg.push(data.data.originMsg.msg.key);
         }
     })
 
@@ -106,16 +107,32 @@ async function startup(){
     /**
      * 写一些全局状态
      */
-    global.CNF.state.lastMsg = "";
+    global.CNF.state.lastMsg = [];
 
-    if (process.env.CONFIG_INDEX == 0) {
-        setTimeout(async function(){
-            global.CNF.net.msg.brocast({
-                key : 'value'
-            })
-            print.info(`Process 0 has send data.`);
-        }, 8000)
-    }
+    // if (process.env.CONFIG_INDEX == 0) {
+    //     setTimeout(async function(){
+    //         global.CNF.net.msg.brocast({
+    //             key : 'value0'
+    //         })
+    //         print.info(`Process 0 has send data.`);
+    //     }, 8000)
+    // }
+
+    // if (process.env.CONFIG_INDEX == 1) {
+    //     setTimeout(async function(){
+    //         global.CNF.net.msg.brocast({
+    //             key : 'value1'
+    //         })
+    //         print.info(`Process 1 has send data.`);
+    //     }, 8000)
+    // }
+
+    setTimeout(async function(){
+        global.CNF.net.msg.brocast({
+            key : `value ${process.env.CONFIG_INDEX}`
+        })
+        print.info(`Process ${process.env.CONFIG_INDEX} has send data.`);
+    }, 10000 + process.env.CONFIG_INDEX * 200);
 
     setInterval(async function(){
         // Demo for manual connect. 
@@ -132,22 +149,8 @@ async function startup(){
         //         })
         //     }
         // }
-
-        // if (global.CNF.netData.connections.outBound.length == 0 && global.CNF.netData.connections.inBound.length == 0) {
-        //     console.log("=====================");
-        //     console.log(`processID: ${process.env.CONFIG_INDEX}`);
-
-        //     console.log("tried bucket length:", global.CNF.netData.buckets.tried[0].length)
-        //     console.log("new bucket length:", global.CNF.netData.buckets.new[0].length)
-        //     console.log("trying bucket length:", global.CNF.netData.buckets.trying.length)
-        //     console.log(`neighbor bucket length:`, global.CNF.netData.discover.neighbor.length)
-        //     // console.log(global.CNF.netData.buckets.new[0])
-        //     console.log(`inbound connect length :`, global.CNF.netData.connections.inBound.length)
-        //     console.log(`outbound connect length:`, global.CNF.netData.connections.outBound.length)
-        //     console.log(`temp connect length:`, global.CNF.netData.connections.temp.length)
-        //     console.log(`doing shake :`, global.CNF.netData.discover.doingShake);
-        // }
         
+        // process 0 status logging
         if (process.env.CONFIG_INDEX == 0) {
             // console.log("=====================process0=========");
             // console.log("tried bucket length:", global.CNF.netData.buckets.tried[0].length)
@@ -186,7 +189,7 @@ async function startup(){
             buckets : global.CNF.netData.buckets,
 
             // Normal state
-            state : global.CNF.state
+            state : global.CNF.state,
         }
 
         process.send(nodeStatus);
@@ -207,6 +210,7 @@ let masterEvents = {
             let nodeInfo = {
                 nodeId : msg.CONFIG.net.publicKey,
                 processID : msg.processID,
+                nodeStatus : 'normal',
                 connections : {
                     inBound : [],
                     outBound : []
@@ -239,15 +243,23 @@ let masterJob = {
             app.use("/public", Express.static(`${__dirname}/frontEnd`));
 
             app.get("/api/node_status", async function(req, res) {
+                // 清掉没有心跳的节点
+                let now = +new Date();
+                for(var nodeId in masterStatus.nodes) {
+                    if (now - masterStatus.nodes[nodeId].update >= 5000) {
+                        masterStatus.nodes[nodeId].nodeStatus = 'disconnect';
+                    }
+                }
+
                 res.send(JSON.stringify({
                     status : 2000,
                     nodes : masterStatus.nodes
                 }));
             })
-	    let port = 8081;
-            app.listen(port, function(){
-	    	print.info(`Node already listen at ${port}`);
-	    })
+            let port = 8081;
+                app.listen(port, function(){
+                print.info(`Node already listen at ${port}`);
+            })
         }
     }
 }
