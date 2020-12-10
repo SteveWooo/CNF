@@ -5,6 +5,7 @@
  * Github : https://github.com/stevewooo
  */
 const net = require('net');
+const { format } = require('path');
 const print = global.CNF.utils.print;
 const Error = global.CNF.utils.Error;
 
@@ -25,7 +26,12 @@ let build = async function(param){
         inBound : [],
         outBound : [],
 
-        temp : []
+        temp : [],
+
+        /**
+         * 这个字段用于处理packet断包问题，用socket的id作为唯一标识索引。这个缓存需要重启节点才能清空
+         */
+        socketPacketCache : {},
     };
 
     global.CNF.netData.connections = globalConnection;
@@ -55,6 +61,126 @@ let build = async function(param){
 model.build = build;
 
 /**
+ * 数据包发送之前需要整理成协议。
+ * @param {JSON string} jsonData 数据包
+ */
+let formatPacket = function (jsonData){
+    let now = +new Date();
+
+    // 先对jsondata做base64编码，防止传输过程中出问题
+    jsonData = Buffer.from(jsonData).toString('base64');
+
+    // 数据包主内容都放这里。
+    let content = `ts:${now};nodeid:${global.CNF.netData.nodeId};content:${jsonData}`;
+    
+    // 40位字符串
+    let hash = global.CNF.utils.sign.hash(content);
+
+    // 最后通过content-length字段切割整个段的内容
+    let packet = `hash:${hash};content-length:${content.length};${content}`;
+    return packet;
+}
+model.formatPacket = formatPacket;
+
+/**
+ * 把socket数据转换成业务可读的JSON数据。
+ * @param {binary} socketData socket接口收到的数据
+ */
+let reFormatPacket = function(socket, socketData) {
+    // console.log('re formatData')
+    let packets = [];
+    socketData = socketData.toString();
+
+    let tempData = socketData; // 创建临时变量，保留原始数据。
+
+    let parsePacket = function(packetData, _socket) {
+        let result = {
+            packets : []
+        }
+        let originPacketData = packetData;
+        // 用 "hash:" 来切割整个数据包
+        packetData = packetData.split('hash:'); // TODO 正则匹配协议
+        packetData.shift(); // 去掉第一个空的部分。
+        
+        // 处理多个数据包
+        for(var i=0;i<packetData.length;i++) {
+            let data = {};
+            data.hash = packetData[i].substring(0, packetData[i].indexOf(';')); // 先把hash取出来，然后去掉这个部分;
+            packetData[i] = packetData[i].substring(packetData[i].indexOf(';') + 1) ;
+
+            // 接下来处理内容长度，判断是否断包。断包的话
+            data.contentLength = packetData[i].substring(packetData[i].indexOf(':') + 1, packetData[i].indexOf(';'));
+            data.contentLength = parseInt(data.contentLength);
+            
+            packetData[i] = packetData[i].substring(packetData[i].indexOf(';') + 1); // 剩余的协议内容。包括时间戳、nodeid、主体数据等
+
+            // 断包，但带了头部的数据包
+            if (packetData[i].length < data.contentLength) {
+                global.CNF.netData.connections.socketPacketCache[_socket.id] = originPacketData; // 把整个数据包给它。
+                continue;
+            }
+
+            // 正常包
+            if (packetData[i].length == data.contentLength) {
+                delete global.CNF.netData.connections.socketPacketCache[_socket.id];
+                let temp = packetData[i].split(';');
+                for(var k=0;k<temp.length;k++) {
+                    let kv = temp[k].split(':');
+                    data[kv[0]] = kv[1];
+                }
+                result.packets.push(data);
+                continue;
+            }
+
+            if (packetData[i].length > data.contentLength) {
+                print.error("数据包长度异常，已丢包");
+                continue ;
+            }
+        }
+
+        return result;
+    }
+
+    // 头部正常的情况
+    if (tempData.indexOf('hash:') == 0) {
+        let result = parsePacket(tempData, socket);
+        for(var i=0;i<result.packets.length;i++) {
+            packets.push(result.packets[i]);
+        }
+    }
+
+    // 头部信息不正常的，一律当作断包处理。
+    if (tempData.indexOf('hash:') != 0) {
+        // 头部断包，而且没有缓存，就扔掉。
+        if (global.CNF.netData.connections.socketPacketCache[socket.id] == undefined) {
+            return packets;
+        }
+
+        // 直接接上它
+        global.CNF.netData.connections.socketPacketCache[socket.id] += tempData;
+        let result = parsePacket(global.CNF.netData.connections.socketPacketCache[socket.id], socket);
+        for(var i=0;i<result.packets.length;i++) {
+            packets.push(result.packets[i]);
+        }
+    }
+
+    for(var i=0;i<packets.length;i++) {
+        packets[i].content = Buffer.from(packets[i].content, 'base64').toString();
+    }
+
+    if (packets.length > 1) {
+        print.warn("出现粘包情况");
+    }
+
+    if (packets.length == 0) {
+        print.warn("出现断包情况");
+    }
+
+    return packets;
+}
+model.reFormatPacket = reFormatPacket;
+
+/**
  * 尝试对一个节点发起连接
  */
 function doConnect (node, callbackFunc) {
@@ -68,6 +194,10 @@ function doConnect (node, callbackFunc) {
             // socket.on('error', async function(e) {
             //     await callbackFunc.onError(e, socket);
             // })
+
+            // 给socket一个本地唯一标识
+            socket.id = global.CNF.utils.sign.hash(global.CNF.utils.sign.genKeys().publicKey);
+
             socket.on('data', async function(data){
                 await callbackFunc.onMessage(data, socket);
             });
@@ -103,7 +233,9 @@ model.tryOutBoundConnect = tryOutBoundConnect;
  */
 let tcpShake = async function(socket){
     let pack = new TcpShake();
-    socket.write(pack.data);
+    // 格式化成规范协议
+    let sendData = formatPacket(pack.data);
+    socket.write(sendData);
     return ;
 }
 model.tcpShake = tcpShake;
@@ -113,7 +245,9 @@ model.tcpShake = tcpShake;
  */
 let tcpShakeBack = async function(socket) {
     let pack = new TcpShakeBack();
-    socket.write(pack.data);
+    // 格式化成规范协议
+    let sendData = formatPacket(pack.data);
+    socket.write(sendData);
     return ;
 }
 model.tcpShakeBack = tcpShakeBack;
@@ -345,10 +479,13 @@ model.finishTcpShake = finishTcpShake;
  * 广播BUSS消息
  */
 let brocast = async function(data){
+    // 格式化成规范协议
+    data = formatPacket(data);
     for(var i=0;i<global.CNF.netData.connections.inBound.length;i++) {
         try{
             global.CNF.netData.connections.inBound[i].socket.write(data);
         }catch(e) {
+            console.log(e);
             // 不处理
         }
     }
@@ -356,12 +493,23 @@ let brocast = async function(data){
         try{
             global.CNF.netData.connections.outBound[i].socket.write(data);
         }catch(e) {
+            console.log(e);
             // 不处理
         }
     }
     // console.log('done brocast');
 }
 model.brocast = brocast;
+
+/**
+ * 发送数据给一个指定的socket，外面不能随便调用，所有发送接口都需要在这个模块里面调用
+ */
+let sendData = async function(socket, data) {
+    data = formatPacket(data);
+    socket.write(data);
+    return ;
+}
+model.sendData = sendData;
 
 // 通过nodeId获得连接对象
 let getConnectionByNodeId = async function(nodeId) {

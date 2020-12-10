@@ -25,9 +25,19 @@ let findNodeService = {
 
     onMessage : async function(data, socket) {
         // let result = await receiveTcpMsgService.onMessage(socket, data, 'outBoundNodeMsg');
-
+        let formatData = [];
+        // console.log('receive data');
         try{
-            data = JSON.parse(data.toString());
+            // data = JSON.parse(data.toString());
+            formatData = model.connection.reFormatPacket(socket, data);
+            for(var i=0;i<formatData.length;i++) {
+                // 加入消息队列，防拥堵
+                await model.connection.pushMsgPool({
+                    fromType : 'outBoundNodeMsg',
+                    socket : socket,
+                    data : JSON.parse(formatData[i].content)
+                });
+            }
         }catch(e) {
             console.log("findNodeService.js on message", e);
             // console.log(data.toString());
@@ -35,11 +45,11 @@ let findNodeService = {
         }
 
         // 加入消息队列，防拥堵
-        await model.connection.pushMsgPool({
-            fromType : 'outBoundNodeMsg',
-            socket : socket,
-            data : data
-        });
+        // await model.connection.pushMsgPool({
+        //     fromType : 'outBoundNodeMsg',
+        //     socket : socket,
+        //     data : data
+        // });
         return ;
     },
 

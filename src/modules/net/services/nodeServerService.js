@@ -24,31 +24,36 @@ let nodeServerService = {
     isConnecting : false,
     // 被连接的时候，就会触发这个函数，参数socket是别人的socket，需要放到inBound里面
     onConnect : async function(socket){
-        // if(nodeServerService.isConnecting === true) {
-        //     return ;
-        // }
         nodeServerService.isConnecting = true;
         // print.info(`Was connected by ${socket.remoteAddress}:${socket.remotePort}`);
 
         // 有人来连接,就扔进temp先
         await model.connection.pushTempConnection(socket);
 
+        // 给socket一个本地唯一标识
+        socket.id = global.CNF.utils.sign.hash(global.CNF.utils.sign.genKeys().publicKey);
+
         socket.on('data', async function(data){
             // let result = await receiveTcpMsgService.onMessage(socket, data, 'inBoundNodeMsg');
+            let formatData = [];
+            // console.log('receive data');
             try{
-                data = JSON.parse(data.toString());
+                // data = JSON.parse(data.toString());
+                formatData = model.connection.reFormatPacket(socket, data);
+                for(var i=0;i<formatData.length;i++) {
+                    // 加入消息队列，防拥堵
+                    await model.connection.pushMsgPool({
+                        fromType : 'inBoundNodeMsg',
+                        socket : socket,
+                        data : JSON.parse(formatData[i].content)
+                    });
+                }
             }catch(e) {
                 console.log("nodeServerService.js on message", e);
                 // console.log(data.toString());
                 throw Error(6001, 'nodeServerServoce.js nodeServerService.onData event');
             }
             
-            // 加入消息队列，防拥堵
-            await model.connection.pushMsgPool({
-                fromType : 'inBoundNodeMsg',
-                socket : socket,
-                data : data
-            });
             return ;
         })
         socket.on('error', async function(e) {

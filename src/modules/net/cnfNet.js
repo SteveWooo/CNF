@@ -123,7 +123,7 @@ let handle = function(){
                     msg : msg
                 }
                 data = JSON.stringify(data);
-                socket.write(data);
+                await model.connection.sendData(socket, data);
             },
 
             /**
@@ -137,7 +137,7 @@ let handle = function(){
                 }
 
                 data = JSON.stringify(data);
-                socket.write(data);
+                await model.connection.sendData(socket, data);
             },
 
             autoShareNeighbor : async function(msg) {
@@ -166,7 +166,7 @@ let handle = function(){
                     }
                 }
                 data = JSON.stringify(data);
-                socket.write(data);
+                await model.connection.sendData(socket, data);
 
                 // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
                 await model.bucket.deleteTryingNode(node);

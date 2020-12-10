@@ -77,7 +77,7 @@ async function startup(){
     /**
      * 使用邻居自动分享策略
      */
-    // conf.net.neighborAutoShare = true; // default false
+    conf.net.neighborAutoShare = true; // default false
 
     /**
      * 把上面的配置载入
@@ -128,11 +128,15 @@ async function startup(){
     // }
 
     setTimeout(async function(){
-        global.CNF.net.msg.brocast({
-            key : `value ${process.env.CONFIG_INDEX}`
+        let value = `value ${process.env.CONFIG_INDEX}`;
+        for(var i=0;i<100000;i++) {
+            value += "aaaaaaaaaaa";
+        }
+        await global.CNF.net.msg.brocast({
+            key : value
         })
         print.info(`Process ${process.env.CONFIG_INDEX} has send data.`);
-    }, 10000 + process.env.CONFIG_INDEX * 200);
+    }, 5000 + process.env.CONFIG_INDEX * 500);
 
     setInterval(async function(){
         // Demo for manual connect. 
@@ -266,7 +270,7 @@ let masterJob = {
 
 async function main(){
     if(Cluster.isMaster) {
-        for(var i=0;i<40;i++) {
+        for(var i=0;i<2;i++) {
             let worker = Cluster.fork({
                 CONFIG_INDEX : i
             });
