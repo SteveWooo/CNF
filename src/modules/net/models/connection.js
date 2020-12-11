@@ -169,11 +169,11 @@ let reFormatPacket = function(socket, socketData) {
     }
 
     if (packets.length > 1) {
-        print.warn("出现粘包情况");
+        // print.warn("出现粘包情况");
     }
 
     if (packets.length == 0) {
-        print.warn("出现断包情况");
+        // print.warn("出现断包情况");
     }
 
     return packets;

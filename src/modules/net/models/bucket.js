@@ -198,7 +198,7 @@ let addNewNodeToTried = async function(node){
         newNode = node;
     }
 
-    // todo
+    // TODO 需要分kad距离
     global.CNF.netData.buckets.tried[0].push(newNode);
 }
 
@@ -219,6 +219,7 @@ let addNodeToNew = async function(node){
         return ;
     }
 
+    // TODO 需要分kad距离
     global.CNF.netData.buckets.new[0].push(node);
 }
 

@@ -129,14 +129,14 @@ async function startup(){
 
     setTimeout(async function(){
         let value = `value ${process.env.CONFIG_INDEX}`;
-        for(var i=0;i<100000;i++) {
+        for(var i=0;i<5000;i++) {
             value += "aaaaaaaaaaa";
         }
         await global.CNF.net.msg.brocast({
             key : value
         })
         print.info(`Process ${process.env.CONFIG_INDEX} has send data.`);
-    }, 5000 + process.env.CONFIG_INDEX * 500);
+    }, 20000 + process.env.CONFIG_INDEX * 500);
 
     setInterval(async function(){
         // Demo for manual connect. 
@@ -270,7 +270,7 @@ let masterJob = {
 
 async function main(){
     if(Cluster.isMaster) {
-        for(var i=0;i<2;i++) {
+        for(var i=0;i<20;i++) {
             let worker = Cluster.fork({
                 CONFIG_INDEX : i
             });
