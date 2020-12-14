@@ -129,9 +129,9 @@ async function startup(){
 
     setTimeout(async function(){
         let value = `value ${process.env.CONFIG_INDEX}`;
-        for(var i=0;i<5000;i++) {
-            value += "aaaaaaaaaaa";
-        }
+        // for(var i=0;i<5000;i++) {
+        //     value += "aaaaaaaaaaa";
+        // }
         await global.CNF.net.msg.brocast({
             key : value
         })
@@ -255,6 +255,13 @@ let masterJob = {
                     }
                 }
 
+                let maxConn = 0;
+                for(var nodeId in masterStatus.nodes) {
+                    maxConn += masterStatus.nodes[nodeId].connections.inBound.length;
+                    maxConn += masterStatus.nodes[nodeId].connections.outBound.length;
+                }
+                console.log(`Connection counts: ${maxConn}`);
+
                 res.send(JSON.stringify({
                     status : 2000,
                     nodes : masterStatus.nodes
@@ -270,7 +277,7 @@ let masterJob = {
 
 async function main(){
     if(Cluster.isMaster) {
-        for(var i=0;i<20;i++) {
+        for(var i=0;i<80;i++) {
             let worker = Cluster.fork({
                 CONFIG_INDEX : i
             });
