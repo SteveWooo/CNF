@@ -2,7 +2,7 @@ let Cnf = require(`${__dirname}/../../Cnf.js`);
 const fs = require('fs')
 
 let nodes = [];
-const NODE_COUNT = 50000
+const NODE_COUNT = 10000
 async function buildNodes(){
     let cnf = new Cnf();
     for(var i=0;i<NODE_COUNT;i++) {
@@ -68,7 +68,7 @@ async function buildNodes(){
 
     console.log("do writing")
 
-    fs.writeFileSync(`${__dirname}/../../../../GOPATH/src/github.com/cnf_core/config/test1WComplex.json`, JSON.stringify(nodes));
+    fs.writeFileSync(`${__dirname}/../../../cnf_core/config/test1WComplex.json`, JSON.stringify(nodes));
 
     // for(var i=0;i<nodes.length;i++) {
     //     fs.writeFileSync(`${__dirname}/test10WComplex/node_${i}.json`, JSON.stringify(nodes[i]));
