@@ -77,7 +77,7 @@ async function startup(){
     /**
      * 使用邻居自动分享策略
      */
-    conf.net.neighborAutoShare = true; // default false
+    // conf.net.neighborAutoShare = true; // default false
 
     /**
      * 把上面的配置载入
@@ -129,9 +129,9 @@ async function startup(){
 
     setTimeout(async function(){
         let value = `value ${process.env.CONFIG_INDEX}`;
-        for(var i=0;i<5000;i++) {
-            value += "aaaaaaaaaaa";
-        }
+        // for(var i=0;i<5000;i++) {
+        //     value += "aaaaaaaaaaa";
+        // }
         await global.CNF.net.msg.brocast({
             key : value
         })
@@ -155,7 +155,7 @@ async function startup(){
         // }
         
         // process 0 status logging
-        if (process.env.CONFIG_INDEX == 0) {
+        if (process.env.CONFIG_INDEX != 0) {
             // console.log("=====================process0=========");
             // console.log("tried bucket length:", global.CNF.netData.buckets.tried[0].length)
             // console.log("new bucket length:", global.CNF.netData.buckets.new[0].length)
@@ -270,7 +270,7 @@ let masterJob = {
 
 async function main(){
     if(Cluster.isMaster) {
-        for(var i=0;i<20;i++) {
+        for(var i=3;i<4;i++) {
             let worker = Cluster.fork({
                 CONFIG_INDEX : i
             });

@@ -107,7 +107,7 @@ let findNodeService = {
             // 尝试完就扔tryingNode里面
             await model.bucket.tryConnectNode(node);
             // 然后马上给对方发tcpshake包,表明自己的nodeId
-            await model.connection.tcpShake(socket);
+            await model.connection.tcpShake(socket, node);
         } else {
             // print.error(`cnfNet.js findNodeService.doFineNode: socket创建失败`)
         }

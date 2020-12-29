@@ -40,6 +40,7 @@ let nodeServerService = {
             try{
                 // data = JSON.parse(data.toString());
                 formatData = model.connection.reFormatPacket(socket, data);
+                // console.log(formatData)
                 for(var i=0;i<formatData.length;i++) {
                     // 加入消息队列，防拥堵
                     await model.connection.pushMsgPool({

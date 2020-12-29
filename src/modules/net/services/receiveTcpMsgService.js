@@ -27,6 +27,7 @@ let receiveTcpMsgService = {
             }
             // console.log('get shake back');
             data.msg = JSON.parse(data.msg);
+            data.msg.from.nodeId = data.msg.from.nodeID
             let node = new model.Node(data.msg.from);
 
             // 检查networkid，不允许networkid不一致的节点加入网络
@@ -61,9 +62,11 @@ let receiveTcpMsgService = {
                 callback : false
             }
             // console.log('get shake');
+    
             data.msg = JSON.parse(data.msg);
+            data.msg.from.nodeId = data.msg.from.nodeID
             let node = new model.Node(data.msg.from);
-
+            
             // 检查networkid，不允许networkid不一致的节点加入网络
             if (data.msg.from.networkid != global.CNF.CONFIG.net.networkid) {
                 await global.CNF.net.msg.socketDestroy(socket, node);
@@ -94,12 +97,13 @@ let receiveTcpMsgService = {
                     return result;
                 }
 
+                // console.log("add tried")
                 await model.bucket.addNewNodeToTried(node);
             } else {
                 print.error("非InBoudNode发送了TCP shakeEvent")
             }
 
-            await model.connection.tcpShakeBack(socket);
+            await model.connection.tcpShakeBack(socket, node);
 
             return result;
         },

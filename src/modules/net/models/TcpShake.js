@@ -15,23 +15,24 @@ const CONFIG = {
  * 构造一个tcp shake包, 主要是告知了自己的节点信息.
  * TODO 签名
  */
-function Shake(){
+function Shake(node){
     let now = +new Date();
     let msg = {
-        ts : now,
+        ts : now + "",
         from : {
-            nodeId : global.CNF.netData.nodeId,
+            nodeID : global.CNF.netData.nodeId,
             ip : global.CNF.CONFIG.net.localhost,
-            tcpport : global.CNF.CONFIG.net.connectionTcpServerPort,
-            udpport : global.CNF.CONFIG.net.discoverUdpPort,
-            networkid : global.CNF.CONFIG.net.networkid
+            tcpport : global.CNF.CONFIG.net.connectionTcpServerPort + "",
+            udpport : global.CNF.CONFIG.net.discoverUdpPort + "",
+            networkid : global.CNF.CONFIG.net.networkid + ""
         },
-        version : CONFIG.VERSION
+        version : CONFIG.VERSION + ""
     }
     msg = JSON.stringify(msg);
     let data = {
         event: 'shakeEvent',
-        msg : msg
+        msg : msg,
+        targetNodeID : node.nodeId
     }
 
     return {

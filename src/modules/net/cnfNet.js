@@ -166,11 +166,11 @@ let handle = function(){
                     }
                 }
                 data = JSON.stringify(data);
-                await model.connection.sendData(socket, data);
+                // await model.connection.sendData(socket, data);
 
-                // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
-                await model.bucket.deleteTryingNode(node);
-                await model.connection.doSocketDestroy(socket);
+                // // 同步从bucket.trying中删除这个节点，不然的话会一直卡死在trying中出不来。
+                // await model.bucket.deleteTryingNode(node);
+                // await model.connection.doSocketDestroy(socket);
             }
         },
         node : {

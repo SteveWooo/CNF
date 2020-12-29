@@ -42,7 +42,6 @@ let nodeDiscoverService = {
         }
         // console.log('shake:');
         // console.log(node);
-        // console.log(`doing shake`)
         await model.discover.doShake(node, model.discover.CONFIG.PING_TYPE);
         return ;
     },
@@ -56,7 +55,14 @@ let nodeDiscoverService = {
             nodeDiscoverService.isDetecting = true;
             await nodeDiscoverService.detect();
             nodeDiscoverService.isDetecting = false;
-        }, 500);
+        }, 1000);
+        // while(true) {
+        //     await nodeDiscoverService.detect();
+        //     await nodeDiscoverService.detect();
+        //     await nodeDiscoverService.detect();
+        //     await nodeDiscoverService.detect();
+        //     await nodeDiscoverService.detect();
+        // }
         return ;
     },
 

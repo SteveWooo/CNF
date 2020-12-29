@@ -23,14 +23,14 @@ const CONFIG = {
 function Shake(node, type){
     let now = +new Date();
     let msg = {
-        ts : now,
-        type : type,
-        version : CONFIG.VERSION,
+        ts : now + "",
+        type : type + "",
+        version : CONFIG.VERSION + "",
         from : {
             ip : global.CNF.CONFIG.net.localhost,
-            udpport : global.CNF.CONFIG.net.discoverUdpPort,
-            tcpport : global.CNF.CONFIG.net.connectionTcpServerPort,
-            networkid : global.CNF.CONFIG.net.networkid
+            udpport : global.CNF.CONFIG.net.discoverUdpPort + "",
+            tcpport : global.CNF.CONFIG.net.connectionTcpServerPort + "",
+            networkid : global.CNF.CONFIG.net.networkid + ""
         }
     }
 
@@ -42,8 +42,9 @@ function Shake(node, type){
     let data = {
         hash : hash,
         signature : signed.signature,
-        recid : signed.recid,
-        msg : msg
+        recid : signed.recid + "",
+        msg : msg,
+        targetNodeID : node.nodeId
     }
 
     return {

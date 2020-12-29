@@ -235,6 +235,9 @@ let getNeighbor = async function() {
     let node = undefined;
     // 如果neighbor为空，就给一个随机seed进邻居里
     if (global.CNF.netData.discover.neighbor.length == 0) {
+        if (global.CNF.CONFIG.net.seed.length == 0) {
+            return node
+        }
         let index = Math.floor(Math.random() * global.CNF.CONFIG.net.seed.length);
         let seedNode = new Node({
             nodeId : global.CNF.CONFIG.net.seed[index].nodeId,

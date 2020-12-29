@@ -201,7 +201,7 @@ function doConnect (node, callbackFunc) {
             socket.on('data', async function(data){
                 await callbackFunc.onMessage(data, socket);
             });
-            // print.info('out bound connected: ' + node.nodeId);
+            print.info('out bound connected: ' + node.nodeId);
             isConn = true;
             resolve(socket);
         });
@@ -231,8 +231,8 @@ model.tryOutBoundConnect = tryOutBoundConnect;
 /**
  * 向参数的socket发送tcp握手包
  */
-let tcpShake = async function(socket){
-    let pack = new TcpShake();
+let tcpShake = async function(socket, node){
+    let pack = new TcpShake(node);
     // 格式化成规范协议
     let sendData = formatPacket(pack.data);
     socket.write(sendData);
@@ -243,8 +243,8 @@ model.tcpShake = tcpShake;
 /**
  * 别人发shake, 你要shakeBack
  */
-let tcpShakeBack = async function(socket) {
-    let pack = new TcpShakeBack();
+let tcpShakeBack = async function(socket, node) {
+    let pack = new TcpShakeBack(node);
     // 格式化成规范协议
     let sendData = formatPacket(pack.data);
     socket.write(sendData);
