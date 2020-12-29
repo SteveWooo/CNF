@@ -255,6 +255,13 @@ let masterJob = {
                     }
                 }
 
+                let maxConn = 0;
+                for(var nodeId in masterStatus.nodes) {
+                    maxConn += masterStatus.nodes[nodeId].connections.inBound.length;
+                    maxConn += masterStatus.nodes[nodeId].connections.outBound.length;
+                }
+                console.log(`Connection counts: ${maxConn}`);
+
                 res.send(JSON.stringify({
                     status : 2000,
                     nodes : masterStatus.nodes
