@@ -107,3 +107,7 @@ example/serverNode/config.json
 example/mulNodes/data1
 example/mulNodes/data2
 example/clusters/datas/
+
+example/frontEndDemo/mats*
+
+example/goProj/nodes.data

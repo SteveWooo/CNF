@@ -1,12 +1,91 @@
 const Express = require("express")
 const Cluster = require("cluster")
 const Dgram = require("dgram")
+const fs = require("fs")
+const request = require('request')
+
+/**
+ * node --max-old-space-size=16384 startup.js // 拿满16G内存
+ */
 
 var masterStatus = {
     nodes : {},
     updateNodes : async function(jsonData){
         // console.log(jsonData)
+        if (jsonData["nodeID"] == undefined) {
+            return 
+        }
         masterStatus.nodes[jsonData["nodeID"]] = jsonData
+    },
+    // 搞出一个floyd算法
+    lastNodeStatus : {},
+    // 结点连接情况稳定次数
+    doneTime : 0,
+    // 结点连接情况稳定上限，到达这个上限，就写文件，走下一步
+    ALL_DONE_TIME : 4,
+
+    // 是否使用区域Master算法，这些参数需要作为环境变量传递下去。mats_masterAreaKad代表使用区域master算法
+    // 
+    logDirName : "mats_originKad",
+    // logDirName : "mats_masterAreaKad",
+    nodeCount : 500, // 初始结点数
+
+    calculate : async function() {
+        // 当大家的对外连接都稳定有8个了，就写状态
+        var done = true
+        var length = 0
+        var node
+        for(var nodeID in masterStatus.nodes) {
+            node = masterStatus.nodes[nodeID]
+            if (masterStatus.lastNodeStatus[nodeID] == undefined) {
+                masterStatus.lastNodeStatus[nodeID] = 0
+            }
+
+            length = 0
+            if (node.netStatus.nodeConnectionStatus.serviceStatus.outBoundConn != undefined) {
+                length += node.netStatus.nodeConnectionStatus.serviceStatus.outBoundConn.length
+            }
+            if (node.netStatus.nodeConnectionStatus.serviceStatus.inBoundConn != undefined) {
+                length += node.netStatus.nodeConnectionStatus.serviceStatus.inBoundConn.length
+            }
+
+            // 对比近两次的状态，如果都没变化，就写
+            if (length != masterStatus.lastNodeStatus[nodeID]) {
+                done = false
+            }
+
+            masterStatus.lastNodeStatus[nodeID] = length
+        }
+        if (done) {
+            masterStatus.doneTime ++
+            if (masterStatus.doneTime > masterStatus.ALL_DONE_TIME) {
+                return 
+            }
+            // console.log(`done time: ${masterStatus.doneTime}`)
+        } else {
+            masterStatus.doneTime = 0
+        }
+
+        if (masterStatus.doneTime == masterStatus.ALL_DONE_TIME) {
+            // 数一下结点数
+            let nodeCount = Object.keys(masterStatus.nodes).length
+            try{
+                fs.mkdirSync(`${__dirname}/${masterStatus.logDirName}/${nodeCount}`)
+            }catch(e) {
+
+            }
+            fs.writeFileSync(`${__dirname}/${masterStatus.logDirName}/${nodeCount}/originMat.json`, JSON.stringify(masterStatus.nodes))
+            console.log(`数据采集完成，开始计算`)
+            try{
+                var stdout = require('child_process').execSync(`node --max-old-space-size=16384 ${__dirname}/translateToFloydMat.js ${masterStatus.logDirName} ${nodeCount}`)
+                console.log(stdout.toString())
+                process.send(1)
+            } catch(e) {
+                console.log(e)
+            }
+        }
+        
+        return 
     }
 }
 
@@ -60,13 +139,13 @@ let masterJob = {
 
             let port = 8081;
             app.listen(port, function(){
-                console.log("app listen : " + port)
+                // console.log("app listen : " + port)
             })
 
             // udp服务器
             let udpSoceket = Dgram.createSocket("udp4")
             udpSoceket.on("listening", async function(){
-                console.log("udp server listen at : " + port)
+                // console.log("udp server listen at : " + port)
             })
     
             udpSoceket.on("message", async function(message, remote){
@@ -74,6 +153,7 @@ let masterJob = {
                 let data ;
                 try{
                     data = JSON.parse(message)
+                    console.log(data)
                 }catch(e) {
                     console.log(e)
                 }
@@ -91,10 +171,103 @@ let masterJob = {
 }
 
 async function main(){
+    var nodeWorker, goWorker
     if(Cluster.isMaster) {
-        Cluster.fork()
+        setInterval(async function(){
+            // console.log(nodeWorker == undefined)
+            if (nodeWorker == undefined) {
+                // 子进程环境变量
+                var forkEnv = {
+                    "RUNING_MODULE" : "", // 下面填
+                    "CNF_NODECOUNT" : masterStatus.nodeCount,
+                    "LOG_DIR_NAME" : masterStatus.logDirName
+                }
+
+                forkEnv["RUNING_MODULE"] = "nodecnf"
+                nodeWorker = Cluster.fork(forkEnv)
+                nodeWorker.on("exit", async function(){
+                    // console.log("node cnf on exit")
+                    nodeWorker = undefined
+                })
+
+                // 只演示的话，不需要启动go进程
+                if(process.argv[2] != "onlyshow") {
+                    forkEnv["RUNING_MODULE"] = "gocnf"
+                    goWorker = Cluster.fork(forkEnv)
+                    goWorker.on("exit", async function(){
+                        // console.log("go cnf on exit")
+                        goWorker = undefined
+                    })
+                }
+
+                nodeWorker.on("message", async function(msg) {
+                    // 1 代表正常退出，可以开始进行下一轮实验
+                    if(msg == 1) {
+                        // 如果这个是使用originkad算法，就转换成masterArea算法，直接开始下一轮
+                        if (masterStatus.logDirName == "mats_originKad") {
+                            masterStatus.logDirName = "mats_masterAreaKad"
+                        } else { // 如果这个已经使用了masterAreaKad算法，那就加一点结点再开始一轮
+                            masterStatus.logDirName = "mats_originKad"
+                            masterStatus.nodeCount += 100
+                        }
+
+                        // 只演示的话，不需要杀掉进程，让他自己一直跑下去就行了
+                        if(process.argv[2] != "onlyshow") {
+                            nodeWorker.send("kill")
+                            goWorker.send("kill")
+                        }
+                    }
+                })
+            }
+        }, 2000)
+
     } else {
-        await masterJob.httpServer.init();
+        // 设置统一变量
+        masterStatus.nodeCount = process.env["CNF_NODECOUNT"]
+        masterStatus.logDirName = process.env["LOG_DIR_NAME"]
+        // 判断启动的环境变量
+        if (process.env["RUNING_MODULE"] == "nodecnf") {
+            process.on("message", function(msg) {
+                // console.log(`node worker receive : ${msg}`)
+                if(msg == "kill") {
+                    process.exit(0)
+                }
+            })
+            await masterJob.httpServer.init();
+
+            // 防止上一次没算完，就进入下一次计算
+            var doneCalculate = true
+            setInterval(async function(){
+                // 没算完就退出
+                if (doneCalculate == false ) {
+                    return 
+                }
+
+                doneCalculate = false
+                await masterStatus.calculate()
+                doneCalculate = true
+            }, 3000)
+        }
+
+        if (process.env["RUNING_MODULE"] == "gocnf") {
+            console.log(`${new Date()} 开始实验 \n结点数:${masterStatus.nodeCount} 使用masterArea算法:${masterStatus.logDirName}`)
+            process.on("message", function(msg) {
+                if(msg == "kill") {
+                    // 使用http请求，让go进程自己结束，不然会占用端口。
+                    request("http://localhost:8082/exit", async function(err, res, body) {
+                        process.exit(0)
+                    })
+                }
+            })
+            // 启动go进程
+            require('child_process').exec(`run.bat ${masterStatus.nodeCount} ${masterStatus.logDirName}`, {
+                "cwd" : `${__dirname}/../../../cnf_core`
+            }, function(err, stdout){
+                if (err) {
+                    console.log(err)
+                }
+            })
+        }
     }
 }
 main();
