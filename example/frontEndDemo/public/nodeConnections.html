@@ -42,8 +42,8 @@
                                     // var index = masterStatus.buss.nodeCount ++ ; // 使用随机编号
                                     var index = node["number"] // 使用节点的配置编号
 
-                                    var NODE_PER_LINE = 100;
-                                    var SIZE = 2
+                                    var NODE_PER_LINE = 50;
+                                    var SIZE = 3
                                     node.feStatus = {
                                         index : index,
                                         width : 3 * SIZE,
@@ -58,43 +58,48 @@
 
                                     masterStatus.buss.nodes[nodeId] = node;
 
+                                    function updateNodeXY(nid) {
+                                        masterStatus.buss.nodes[nid].feStatus.x = 10 * SIZE * (masterStatus.buss.nodes[nid].feStatus.index % NODE_PER_LINE) + 2 * SIZE
+                                        masterStatus.buss.nodes[nid].feStatus.y = 10 * SIZE * Math.floor(masterStatus.buss.nodes[nid].feStatus.index / NODE_PER_LINE) + 2 * SIZE
+
+                                        // 给中心点加点随机数，看起来舒服点
+                                        var xRandom = Math.random() * masterStatus.buss.nodes[nid].feStatus.width + (masterStatus.buss.nodes[nid].feStatus.width / 2);
+                                        var yRandom = Math.random() * masterStatus.buss.nodes[nid].feStatus.height + (masterStatus.buss.nodes[nid].feStatus.height / 2);
+
+                                        masterStatus.buss.nodes[nid].feStatus.x = masterStatus.buss.nodes[nid].feStatus.x + xRandom;
+                                        masterStatus.buss.nodes[nid].feStatus.y = masterStatus.buss.nodes[nid].feStatus.y + yRandom;
+
+                                        masterStatus.buss.nodes[nid].feStatus.centerLocate.x = masterStatus.buss.nodes[nid].feStatus.x + masterStatus.buss.nodes[nid].feStatus.width / 2;
+                                        masterStatus.buss.nodes[nid].feStatus.centerLocate.y = masterStatus.buss.nodes[nid].feStatus.y +  masterStatus.buss.nodes[nid].feStatus.height / 2;
+                                    }
+                                    updateNodeXY(nodeId)
+
                                     /**
                                      * 计算kad环距离
                                      */
-                                     var insertIndex = 0
-                                    for(var kadIndex=0;kadIndex < masterStatus.buss.kadRangeNodeID.length;kadIndex++) {
-                                        var newNodeHead = parseInt(nodeId.substring(2, 4), 16)
-                                        var thisNodeHead = parseInt(masterStatus.buss.kadRangeNodeID[kadIndex].substring(2, 4))
+                                    //  var insertIndex = 0
+                                    // for(var kadIndex=0;kadIndex < masterStatus.buss.kadRangeNodeID.length;kadIndex++) {
+                                    //     var newNodeHead = parseInt(nodeId.substring(2, 4), 16)
+                                    //     var thisNodeHead = parseInt(masterStatus.buss.kadRangeNodeID[kadIndex].substring(2, 4))
 
-                                        if (newNodeHead > thisNodeHead) {
-                                            insertIndex ++
-                                            continue 
-                                        } else {
-                                            break
-                                        }
-                                    }
-                                    masterStatus.buss.kadRangeNodeID.splice(insertIndex, 0, nodeId)
+                                    //     if (newNodeHead > thisNodeHead) {
+                                    //         insertIndex ++
+                                    //         continue 
+                                    //     } else {
+                                    //         break
+                                    //     }
+                                    // }
+                                    // masterStatus.buss.kadRangeNodeID.splice(insertIndex, 0, nodeId)
 
-                                    // 遍历更新所有结点的index坐标
-                                    for(var kadIndex=0;kadIndex < masterStatus.buss.kadRangeNodeID.length;kadIndex++) {
-                                        var nid = masterStatus.buss.kadRangeNodeID[kadIndex]
-                                        if (masterStatus.buss.nodes[nid] != undefined) {
-                                            // masterStatus.buss.nodes[nid].feStatus.index = kadIndex // 更新kad坐标
-                                            // 更新结点xy坐标
-                                            masterStatus.buss.nodes[nid].feStatus.x = 10 * SIZE * (masterStatus.buss.nodes[nid].feStatus.index % NODE_PER_LINE) + 2 * SIZE
-                                            masterStatus.buss.nodes[nid].feStatus.y = 10 * SIZE * Math.floor(masterStatus.buss.nodes[nid].feStatus.index / NODE_PER_LINE) + 2 * SIZE
-
-                                            // 给中心点加点随机数，看起来舒服点
-                                            var xRandom = Math.random() * masterStatus.buss.nodes[nid].feStatus.width + (masterStatus.buss.nodes[nid].feStatus.width / 2);
-                                            var yRandom = Math.random() * masterStatus.buss.nodes[nid].feStatus.height + (masterStatus.buss.nodes[nid].feStatus.height / 2);
-
-                                            masterStatus.buss.nodes[nid].feStatus.x = masterStatus.buss.nodes[nid].feStatus.x + xRandom;
-                                            masterStatus.buss.nodes[nid].feStatus.y = masterStatus.buss.nodes[nid].feStatus.y + yRandom;
-
-                                            masterStatus.buss.nodes[nid].feStatus.centerLocate.x = masterStatus.buss.nodes[nid].feStatus.x + masterStatus.buss.nodes[nid].feStatus.width / 2;
-                                            masterStatus.buss.nodes[nid].feStatus.centerLocate.y = masterStatus.buss.nodes[nid].feStatus.y +  masterStatus.buss.nodes[nid].feStatus.height / 2;
-                                        }
-                                    }
+                                    // // 遍历更新所有结点的index坐标
+                                    // for(var kadIndex=0;kadIndex < masterStatus.buss.kadRangeNodeID.length;kadIndex++) {
+                                    //     var nid = masterStatus.buss.kadRangeNodeID[kadIndex]
+                                    //     if (masterStatus.buss.nodes[nid] != undefined) {
+                                    //         // masterStatus.buss.nodes[nid].feStatus.index = kadIndex // 更新kad坐标
+                                    //         // 更新结点xy坐标
+                                    //         updateNodeXY(nid)
+                                    //     }
+                                    // }
 
                                     continue ;
                                 }
@@ -164,9 +169,9 @@
                             isConn = true
                         }
 
-                        if (!isConn) {
-                            continue 
-                        }
+                        // if (!isConn) {
+                        //     continue 
+                        // }
 
                         // ctx.strokeStyle = "#11f";
                         ctx.lineWidth = 1;

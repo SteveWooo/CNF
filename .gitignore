@@ -109,5 +109,6 @@ example/mulNodes/data2
 example/clusters/datas/
 
 example/frontEndDemo/mats*
+example/frontEndDemo/*data
 
 example/goProj/nodes.data

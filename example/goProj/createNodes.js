@@ -1,9 +1,9 @@
 let Cnf = require(`${__dirname}/../../Cnf.js`);
 const fs = require('fs')
 
-async function buildNodes(){
+async function buildNodes(nodeCount){
     let nodes = [];
-    const NODE_COUNT = 10000
+    const NODE_COUNT = nodeCount
     let cnf = new Cnf();
     for(var i=0;i<NODE_COUNT;i++) {
         let key = cnf.utils.sign.genKeys();
@@ -56,9 +56,93 @@ async function buildNodes(){
     fs.writeFileSync(`${__dirname}/nodes.data`, JSON.stringify(nodes));
 
     // 然后把节点读出来写成配置
-    buildConfigByNodes()
+    // buildConfigByNodes()
+    buildConfigByNodesOfMasterArea()
 }
-buildNodes();
+
+for(var i = 300;i<=3000;i+=100) {
+    buildNodes(i);
+}
+
+// 先找出一堆超级结点
+async function buildConfigByNodesOfMasterArea() {
+    let nodes = fs.readFileSync(`${__dirname}/nodes.data`).toString()
+    nodes = JSON.parse(nodes)
+    let ipConfs = {} // 索引
+    const SUPER_NODE_PRE = {
+        "00" : true,
+        "01" : true,
+        "20" : true,
+        "21" : true,
+        "40" : true,
+        "41" : true,
+        "60" : true,
+        "61" : true,
+        "80" : true,
+        "81" : true,
+        "a0" : true,
+        "a1" : true,
+        "c0" : true,
+        "c1" : true,
+        "e0" : true,
+        "e1" : true,
+    }
+    // 存放超级结点的nodeID
+    let superNodeIndexGroup = []
+
+    // 找出这些超级结点
+    for(var i=0;i<nodes.length;i++) {
+        if (SUPER_NODE_PRE[nodes[i].net.nodeID.substring(2,4)] == true)  {
+            superNodeIndexGroup.push(nodes[i])
+        }
+    }
+
+    // 每组结点的个数
+    let nodeGroupCount = Math.ceil(nodes.length / superNodeIndexGroup.length)
+    
+    // 给普通结点添加种子（注意不要自己给自己上种子
+    for(var i=0;i<nodes.length;i++) {
+        if(ipConfs[nodes[i].net.ip] == undefined) {
+            ipConfs[nodes[i].net.ip] = []
+        }
+
+        // 这个结点用这个超级结点即可
+        superNodeIndex = Math.floor(i / nodeGroupCount)
+
+        // 如果撞了自己就是超级结点，那就跳到下一组
+        if (superNodeIndexGroup[superNodeIndex].net.nodeID == nodes[i].net.nodeID) {
+            superNodeIndex = superNodeIndex + 1 >= superNodeIndexGroup.length ? 0 : superNodeIndex + 1
+        }
+        nodes[i]["net"]["seed"].push({
+            "nodeID" : superNodeIndexGroup[superNodeIndex].net.nodeID,
+            "publicKey" : superNodeIndexGroup[superNodeIndex].net.publicKey,
+            "ip" : superNodeIndexGroup[superNodeIndex].net.ip,
+            "servicePort" : superNodeIndexGroup[superNodeIndex].net.servicePort
+        })
+
+        // 再加一次
+        superNodeIndex ++ 
+        if (superNodeIndex >= superNodeIndexGroup.length) {
+            superNodeIndex = 0
+        }
+        if (superNodeIndexGroup[superNodeIndex].net.nodeID == nodes[i].net.nodeID) {
+            superNodeIndex = superNodeIndex + 1 >= superNodeIndexGroup.length ? 0 : superNodeIndex + 1
+        }
+        nodes[i]["net"]["seed"].push({
+            "nodeID" : superNodeIndexGroup[superNodeIndex].net.nodeID,
+            "publicKey" : superNodeIndexGroup[superNodeIndex].net.publicKey,
+            "ip" : superNodeIndexGroup[superNodeIndex].net.ip,
+            "servicePort" : superNodeIndexGroup[superNodeIndex].net.servicePort
+        })
+
+        ipConfs[nodes[i].net.ip].push(nodes[i])
+    }
+
+    for (var nodeIP in ipConfs) {
+        fs.writeFileSync(`${__dirname}/../../../cnf_core/config/conf.${nodeIP}-${ipConfs[nodeIP].length}.json`, JSON.stringify(ipConfs[nodeIP]));
+    }
+}
+// buildConfigByNodesOfMasterArea()
 
 async function buildConfigByNodes(){
     let nodes = fs.readFileSync(`${__dirname}/nodes.data`).toString()

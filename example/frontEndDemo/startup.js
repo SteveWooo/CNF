@@ -28,7 +28,8 @@ var masterStatus = {
     // 
     logDirName : "mats_originKad",
     // logDirName : "mats_masterAreaKad",
-    nodeCount : 500, // 初始结点数
+    nodeCount : 3000, // 初始结点数
+    nodeCountMax : 3000, // 最大结点数
 
     calculate : async function() {
         // 当大家的对外连接都稳定有8个了，就写状态
@@ -174,8 +175,13 @@ async function main(){
     var nodeWorker, goWorker
     if(Cluster.isMaster) {
         setInterval(async function(){
-            // console.log(nodeWorker == undefined)
             if (nodeWorker == undefined) {
+                if (masterStatus.nodeCount > masterStatus.nodeCountMax) {
+                    console.log("所有轮次实验已完成，请退出主程序")
+                    process.exit(0)
+                    return 
+                }
+                console.log(`==================================`)
                 // 子进程环境变量
                 var forkEnv = {
                     "RUNING_MODULE" : "", // 下面填
@@ -219,7 +225,7 @@ async function main(){
                     }
                 })
             }
-        }, 2000)
+        }, 4000)
 
     } else {
         // 设置统一变量
@@ -250,7 +256,7 @@ async function main(){
         }
 
         if (process.env["RUNING_MODULE"] == "gocnf") {
-            console.log(`${new Date()} 开始实验 \n结点数:${masterStatus.nodeCount} 使用masterArea算法:${masterStatus.logDirName}`)
+            console.log(`${new Date()} 开始实验 \n结点数:${masterStatus.nodeCount} 使用算法:${masterStatus.logDirName}`)
             process.on("message", function(msg) {
                 if(msg == "kill") {
                     // 使用http请求，让go进程自己结束，不然会占用端口。
