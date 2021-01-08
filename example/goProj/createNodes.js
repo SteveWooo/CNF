@@ -60,7 +60,7 @@ async function buildNodes(nodeCount){
     buildConfigByNodesOfMasterArea()
 }
 
-for(var i = 300;i<=3000;i+=100) {
+for(var i = 2700;i<=2700;i+=100) {
     buildNodes(i);
 }
 

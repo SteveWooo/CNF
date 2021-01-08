@@ -28,8 +28,8 @@ var masterStatus = {
     // 
     logDirName : "mats_originKad",
     // logDirName : "mats_masterAreaKad",
-    nodeCount : 3000, // 初始结点数
-    nodeCountMax : 3000, // 最大结点数
+    nodeCount : 2800, // 初始结点数
+    nodeCountMax : 2800, // 最大结点数
 
     calculate : async function() {
         // 当大家的对外连接都稳定有8个了，就写状态
@@ -175,7 +175,7 @@ async function main(){
     var nodeWorker, goWorker
     if(Cluster.isMaster) {
         setInterval(async function(){
-            if (nodeWorker == undefined) {
+            if (nodeWorker == undefined && goWorker == undefined) {
                 if (masterStatus.nodeCount > masterStatus.nodeCountMax) {
                     console.log("所有轮次实验已完成，请退出主程序")
                     process.exit(0)
