@@ -8,7 +8,7 @@ async function buildNodes(nodeCount){
     for(var i=0;i<NODE_COUNT;i++) {
         let key = cnf.utils.sign.genKeys();
         // 每N个节点共用一个端口
-        var N = 1000
+        var N = 1
         var port = 30000;
         port += Math.floor(i / N)
         let conf = {
@@ -26,28 +26,29 @@ async function buildNodes(nodeCount){
             },
             "number" : i + ""
         }
+        // 分树莓派的创建方式：
+        // let NODE_PER_SERVER = 8888
+        // if(i >= 4*NODE_PER_SERVER && i < 5*NODE_PER_SERVER) {
+        //     conf.net.ip = "192.168.10.205"
+        // }
+        // if(i >= 3 * NODE_PER_SERVER && i < 4 * NODE_PER_SERVER) {
+        //     conf.net.ip = "192.168.10.204"
+        // }
+        // if(i >= 2 * NODE_PER_SERVER && i < 3 * NODE_PER_SERVER) {
+        //     conf.net.ip = "192.168.10.203"
+        // }
+        // if(i >= NODE_PER_SERVER && i < 2 * NODE_PER_SERVER) {
+        //     conf.net.ip = "192.168.10.202"
+        // }
+        // if (i < NODE_PER_SERVER) {
+        //     conf.net.ip = "192.168.10.200"
+        //     // conf.net.ip = "192.168.31.164"
+        //     // conf.net.ip = "192.168.10.206"
+        //     // conf.net.ip = "192.168.10.206"
+        // }
 
-        // 分树莓派
-        if(i >= 50000 && i < 60000) {
-            conf.net.ip = "192.168.10.206"
-        }
-        if(i >= 40000 && i < 50000) {
-            conf.net.ip = "192.168.10.205"
-        }
-        if(i >= 30000 && i < 40000) {
-            conf.net.ip = "192.168.10.204"
-        }
-        if(i >= 20000 && i < 30000) {
-            conf.net.ip = "192.168.10.203"
-        }
-        if(i >= 10000 && i < 20000) {
-            conf.net.ip = "192.168.10.202"
-        }
-
-        if (i < 10000) {
-            // conf.net.ip = "192.168.10.200"、
-            conf.net.ip = "192.168.31.164"
-        }
+        // 单机测试的创建方式
+        conf.net.ip = "192.168.10.200";
 
         nodes.push(conf);
     }
@@ -60,9 +61,13 @@ async function buildNodes(nodeCount){
     buildConfigByNodesOfMasterArea()
 }
 
-for(var i = 2700;i<=2700;i+=100) {
-    buildNodes(i);
-}
+// for(var i = 2700;i<=2700;i+=100) {
+//     buildNodes(i);
+// }
+
+// 创建结点入口
+// buildNodes(8888 * 5)
+buildNodes(1000);
 
 // 先找出一堆超级结点
 async function buildConfigByNodesOfMasterArea() {
@@ -110,6 +115,66 @@ async function buildConfigByNodesOfMasterArea() {
         superNodeIndex = Math.floor(i / nodeGroupCount)
 
         // 如果撞了自己就是超级结点，那就跳到下一组
+        if (superNodeIndexGroup[superNodeIndex].net.nodeID == nodes[i].net.nodeID) {
+            superNodeIndex = superNodeIndex + 1 >= superNodeIndexGroup.length ? 0 : superNodeIndex + 1
+        }
+        nodes[i]["net"]["seed"].push({
+            "nodeID" : superNodeIndexGroup[superNodeIndex].net.nodeID,
+            "publicKey" : superNodeIndexGroup[superNodeIndex].net.publicKey,
+            "ip" : superNodeIndexGroup[superNodeIndex].net.ip,
+            "servicePort" : superNodeIndexGroup[superNodeIndex].net.servicePort
+        })
+
+        // 再加一次
+        superNodeIndex ++ 
+        if (superNodeIndex >= superNodeIndexGroup.length) {
+            superNodeIndex = 0
+        }
+        if (superNodeIndexGroup[superNodeIndex].net.nodeID == nodes[i].net.nodeID) {
+            superNodeIndex = superNodeIndex + 1 >= superNodeIndexGroup.length ? 0 : superNodeIndex + 1
+        }
+        nodes[i]["net"]["seed"].push({
+            "nodeID" : superNodeIndexGroup[superNodeIndex].net.nodeID,
+            "publicKey" : superNodeIndexGroup[superNodeIndex].net.publicKey,
+            "ip" : superNodeIndexGroup[superNodeIndex].net.ip,
+            "servicePort" : superNodeIndexGroup[superNodeIndex].net.servicePort
+        })
+
+        // 再加一次
+        superNodeIndex ++ 
+        if (superNodeIndex >= superNodeIndexGroup.length) {
+            superNodeIndex = 0
+        }
+        if (superNodeIndexGroup[superNodeIndex].net.nodeID == nodes[i].net.nodeID) {
+            superNodeIndex = superNodeIndex + 1 >= superNodeIndexGroup.length ? 0 : superNodeIndex + 1
+        }
+        nodes[i]["net"]["seed"].push({
+            "nodeID" : superNodeIndexGroup[superNodeIndex].net.nodeID,
+            "publicKey" : superNodeIndexGroup[superNodeIndex].net.publicKey,
+            "ip" : superNodeIndexGroup[superNodeIndex].net.ip,
+            "servicePort" : superNodeIndexGroup[superNodeIndex].net.servicePort
+        })
+
+        // 再加一次
+        superNodeIndex ++ 
+        if (superNodeIndex >= superNodeIndexGroup.length) {
+            superNodeIndex = 0
+        }
+        if (superNodeIndexGroup[superNodeIndex].net.nodeID == nodes[i].net.nodeID) {
+            superNodeIndex = superNodeIndex + 1 >= superNodeIndexGroup.length ? 0 : superNodeIndex + 1
+        }
+        nodes[i]["net"]["seed"].push({
+            "nodeID" : superNodeIndexGroup[superNodeIndex].net.nodeID,
+            "publicKey" : superNodeIndexGroup[superNodeIndex].net.publicKey,
+            "ip" : superNodeIndexGroup[superNodeIndex].net.ip,
+            "servicePort" : superNodeIndexGroup[superNodeIndex].net.servicePort
+        })
+
+        // 再加一次
+        superNodeIndex ++ 
+        if (superNodeIndex >= superNodeIndexGroup.length) {
+            superNodeIndex = 0
+        }
         if (superNodeIndexGroup[superNodeIndex].net.nodeID == nodes[i].net.nodeID) {
             superNodeIndex = superNodeIndex + 1 >= superNodeIndexGroup.length ? 0 : superNodeIndex + 1
         }

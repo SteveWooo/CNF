@@ -22,6 +22,10 @@ import matplotlib.pyplot as mp
 from mpl_toolkits.mplot3d import Axes3D
 import json
 
+# 字体配置
+fontTitle = {"size":25}
+fontXYZ = {"size":18}
+
 def GetJSONData() :
     fo = open("./finalData.json", "r+")
     file = fo.read()
@@ -39,10 +43,15 @@ def DrawAvg(data) :
 
     mp.plot(originKadX, originKadY, linewidth=2.5, linestyle="-", label="origin-Kad")
     mp.plot(masterAreaKadX, masterAreaKadY, linewidth=2.5, linestyle="-", label="Area-Kad")
-    mp.xlabel('Node Count')
-    mp.ylabel('Average Path Length')
-    
+    mp.xlabel('Node Count', fontdict=fontXYZ)
+    mp.ylabel('Average Path Length', fontdict=fontXYZ)
     mp.legend(loc='upper left')
+
+    mp.title("Average Path Distance", fontdict=fontTitle)
+
+    # 网格
+    mp.grid()
+
     return 
 
 # 画最长路径图
@@ -56,13 +65,19 @@ def DrawMax(data) :
 
     mp.plot(originKadX, originKadY, linewidth=2.5, linestyle="-", label="origin-Kad")
     mp.plot(masterAreaKadX, masterAreaKadY, linewidth=2.5, linestyle="-", label="Area-Kad")
-    mp.xlabel('Node Count')
-    mp.ylabel('Average Path Length')
+    mp.xlabel('Node Count', fontdict=fontXYZ)
+    mp.ylabel('Average Path Length', fontdict=fontXYZ)
     mp.legend(loc='upper left')
+
+    mp.title("Max Path Distance", fontdict=fontTitle)
+
+    # 网格
+    mp.grid()
+
     return 
 
 # 画结点分布3d图
-def DrawNodeDistribute(data, ax):
+def DrawNodeDistribute(data, ax, title):
     # ax = mp.axes(projection="3d")
     X = data["X"]
     Y = data["Y"]
@@ -70,22 +85,25 @@ def DrawNodeDistribute(data, ax):
     Z = np.reshape(Z, (len(Y), len(X)))
     X, Y = np.meshgrid(X, Y)
 
-    mp.xlabel('Node Count')
-    mp.ylabel('Path Length')
+    mp.xlabel('Node Count', fontdict=fontXYZ)
+    mp.ylabel('Path Length', fontdict=fontXYZ)
     # ax.set_zlabel("Sumary Count")
     ax.set_zlim(0, 220000)
     ax.set_ylim(0, 80)
 
-    ax.plot_surface(X, Y, Z, color="blue", rstride=8, cstride=8, alpha=0.95)
+    ax.set_title(title, fontdict=fontTitle)
+
+    ax.plot_surface(X, Y, Z, rstride=8, cstride=8, alpha=0.95)
     return 
 
 data = GetJSONData()
 
-mp.figure("平均最短路径")
+mp.figure("最短路径比较")
 # 图1包含1行2列，现在画在第一列
+mp.subplot(2,2,1)
 DrawAvg(data)
 
-mp.figure("最长路径")
+mp.subplot(2,2,2)
 DrawMax(data)
 
 # mp.figure("原始kad算法的路径分布")
@@ -97,11 +115,11 @@ DrawMax(data)
 # DrawNodeDistribute(data["masterArea3dData"])
 
 fig3d = mp.figure("最短路径结点分布图")
-ax1 = fig3d.add_subplot(1, 2, 1, projection='3d')
-DrawNodeDistribute(data["origin3dData"], ax1)
+ax3 = fig3d.add_subplot(1, 2, 1, projection='3d')
+DrawNodeDistribute(data["origin3dData"], ax3, "Origin Kad")
 
-ax2 = fig3d.add_subplot(1, 2, 2, projection='3d')
-DrawNodeDistribute(data["masterArea3dData"], ax2)
+ax4 = fig3d.add_subplot(1, 2, 2, projection='3d')
+DrawNodeDistribute(data["masterArea3dData"], ax4, "Area Kad")
 
 mp.show()
 

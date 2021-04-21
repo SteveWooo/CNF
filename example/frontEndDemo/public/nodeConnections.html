@@ -39,11 +39,11 @@
                                 // 初次处理
                                 if (masterStatus.buss.nodes[nodeId] == undefined) {
                                     var node = res.nodes[nodeId];
-                                    // var index = masterStatus.buss.nodeCount ++ ; // 使用随机编号
-                                    var index = node["number"] // 使用节点的配置编号
+                                    var index = masterStatus.buss.nodeCount ++ ; // 使用随机编号
+                                    // var index = node["number"] // 使用节点的配置编号
 
-                                    var NODE_PER_LINE = 50;
-                                    var SIZE = 3
+                                    var NODE_PER_LINE = 320;
+                                    var SIZE = 1
                                     node.feStatus = {
                                         index : index,
                                         width : 3 * SIZE,
@@ -239,7 +239,7 @@
                     ctx.font = "7px '微软雅黑'";
                     ctx.textAlign = "left";
                     ctx.shadowBlur = 10;
-                    ctx.fillText(node.number, node.feStatus.x, node.feStatus.y);
+                    // ctx.fillText(node.number, node.feStatus.x, node.feStatus.y);
                 }
 
                 ctx.restore();
@@ -276,11 +276,16 @@
                 masterStatus.canvas.attr("height", "15000px");
                 masterStatus.ctx = masterStatus.canvas[0].getContext("2d");
 
+                var doneBuild = true
                 setInterval(function(){
+                    if (doneBuild = false){
+                        return 
+                    }
+                    doneBuild = false
                     bussinessJob.buildTopo(function(res) {
-                        
+                        doneBuild = true                        
                     });
-                }, 2000)
+                }, 5000)
 
                 // bussinessJob.buildTopo(function(res) {
                         

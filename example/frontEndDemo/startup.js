@@ -76,17 +76,47 @@ var masterStatus = {
 
             }
             fs.writeFileSync(`${__dirname}/${masterStatus.logDirName}/${nodeCount}/originMat.json`, JSON.stringify(masterStatus.nodes))
-            console.log(`数据采集完成，开始计算`)
-            try{
-                var stdout = require('child_process').execSync(`node --max-old-space-size=16384 ${__dirname}/translateToFloydMat.js ${masterStatus.logDirName} ${nodeCount}`)
-                console.log(stdout.toString())
-                process.send(1)
-            } catch(e) {
-                console.log(e)
-            }
+            if(process.argv[2] != "onlyshow") {
+                console.log(`数据采集完成，开始计算`)
+                try{
+                    var stdout = require('child_process').execSync(`node --max-old-space-size=16384 ${__dirname}/translateToFloydMat.js ${masterStatus.logDirName} ${nodeCount}`)
+                    console.log(stdout.toString())
+                    process.send(1)
+                } catch(e) {
+                    console.log(e)
+                }
+            }   
         }
         
         return 
+    },
+
+    storeLogData : async function(time){
+        let count = 0;
+        let totalMem = 0 // 占用系统内存，单位MB
+        let totalCPUUsage = 0 // CPU消耗百分比
+        let node;
+        let outboundLength = 0
+        for(var nodeID in masterStatus.nodes) {
+            node = masterStatus.nodes[nodeID]
+            count ++ 
+            totalMem += node.osMem
+            totalCPUUsage += node.osCPUUsage
+            // 对外连接总数
+            if (node.netStatus.nodeConnectionStatus.serviceStatus.outBoundConn != undefined) {
+                outboundLength += node.netStatus.nodeConnectionStatus.serviceStatus.outBoundConn.length
+            }
+            
+        }
+
+        console.log(`Avg mem: ${totalMem / count}, Avg cpu usage: ${totalCPUUsage / count}, node count: ${count} , total outbound connection: ${outboundLength}`)
+        if (count == 0) {
+            return 
+        }
+        if(process.argv[2] != "onlyshow") {
+            fs.appendFileSync(`${__dirname}/avgMem.data`, `${time} ${totalCPUUsage / count} ${totalMem / count} ${count} ${outboundLength}\n`)
+        }
+        
     }
 }
 
@@ -122,8 +152,10 @@ let masterJob = {
                     try {
                         jsonStr = JSON.parse(body);
 
-                        for(var nodeID in jsonStr) {
-                            await masterStatus.updateNodes(jsonStr[nodeID])
+                        for(var nodeID in jsonStr.nodes) {
+                            jsonStr.nodes[nodeID].osCPUUsage = jsonStr["osCPUUsage"]
+                            jsonStr.nodes[nodeID].osMem = jsonStr['osMem']
+                            await masterStatus.updateNodes(jsonStr.nodes[nodeID])
                         }
 
                         res.send(JSON.stringify({
@@ -242,17 +274,30 @@ async function main(){
             await masterJob.httpServer.init();
 
             // 防止上一次没算完，就进入下一次计算
-            var doneCalculate = true
-            setInterval(async function(){
-                // 没算完就退出
-                if (doneCalculate == false ) {
-                    return 
-                }
+            // var doneCalculate = true
+            // setInterval(async function(){
+            //     // 没算完就退出
+            //     if (doneCalculate == false ) {
+            //         return 
+            //     }
 
-                doneCalculate = false
-                await masterStatus.calculate()
-                doneCalculate = true
+            //     doneCalculate = false
+            //     await masterStatus.calculate()
+            //     doneCalculate = true
+            // }, 3000)
+
+            // 定时保存一份日志
+            let time = 0
+            let doneStorage = true
+            setInterval(async function(){
+                if (doneStorage == true) {
+                    doneStorage = false
+                    await masterStatus.storeLogData(time)
+                    time ++ 
+                    doneStorage = true
+                }
             }, 3000)
+
         }
 
         if (process.env["RUNING_MODULE"] == "gocnf") {
