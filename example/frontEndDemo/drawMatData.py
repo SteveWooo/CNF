@@ -66,7 +66,7 @@ def DrawMax(data) :
     mp.plot(originKadX, originKadY, linewidth=2.5, linestyle="-", label="origin-Kad")
     mp.plot(masterAreaKadX, masterAreaKadY, linewidth=2.5, linestyle="-", label="Area-Kad")
     mp.xlabel('Node Count', fontdict=fontXYZ)
-    mp.ylabel('Average Path Length', fontdict=fontXYZ)
+    mp.ylabel('Max Path Length', fontdict=fontXYZ)
     mp.legend(loc='upper left')
 
     mp.title("Max Path Distance", fontdict=fontTitle)
